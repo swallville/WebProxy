@@ -1,5 +1,4 @@
-# WebProxy
-HTTP WebProxy
+# HTTP WebProxy
 ====================
 Implementation in C++11 of a HTTP Web Proxy
 
