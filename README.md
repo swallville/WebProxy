@@ -52,7 +52,7 @@ Installation
 ---------------
 Make the checkout of the project with:
 
-    $ git clone git@github.com:swallville/WebProxy.git
+    $ git clone https://github.com/swallville/WebProxy.git
 
 Contributing
 -----------------
