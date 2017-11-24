@@ -8,22 +8,25 @@
 
 //Handle multiple socket connections with select and fd_set on Linux
 
-#include <string.h> //strlen
-#include <stdlib.h>
-#include <errno.h>
-#include <sstream>
-
 #include "httpRequest.hpp"
 #include "utils.hpp"
 #include "sockets_func.hpp"
 #include "parser.hpp"
 
+#include <time.h> 
 
 #define TRUE 1
 #define FALSE 0
 #define PORT 8000
 #define MAX_CONNECTIONS 100
+#define PATH_WHITELIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/whitelist.txt"
+#define PATH_BLACKLIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/blacklist.txt"
+#define PATH_DENY_TERMS "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/deny_terms.txt"
+#define PARSER_TOKEN "\n"
 
+std::vector<std::string> whitelist;
+std::vector<std::string> blacklist;
+std::vector<std::string> deny_terms;
 
 struct Client
 {
@@ -38,52 +41,97 @@ struct Client
     int socket;
 };
 
+int allowRedirection(HttpRequest request, std::string message){
+    //Is the url in the whitelist?
+    if(findString(whitelist, request.getUrl())){
+        return 1;//true
+    } else if(findString(blacklist, request.getUrl())){
+        return 0;//false
+    } else{
+        if(findString(deny_terms, message)){
+            return 2;//false
+        }else{
+            return 3;//true
+        }
+    }
+    
+    return true;
+}
 
 void redirect(std::string str, int socketClient){
     HttpRequest request = parserRequest(str);
     
-    //redirect the request...
-    std::string portno = "80";
-    char * host;
+    int redirection_allowed = allowRedirection(request, str);
+    bool isForbidden = false;
     
-    std::string requestedUrl = request.getUrl();
-    std::vector<std::string> address = split(requestedUrl, ":");
+    if(redirection_allowed % 2 == 1 ){ //true
+        //redirect the request...
+        std::string portno = "80";
+        char * host;
+        
+        std::string requestedUrl = request.getUrl();
+        std::vector<std::string> address = split(requestedUrl, ":");
+        
+        if(address.size() == 3)
+            portno = address.at(2);
+        
+        std::vector<std::string> add = split(address.at(1), "//");
+        
+        std::string url =add.at(1);
+        std::vector<std::string> host_split = split(url, "/");
+        url = host_split.at(0);
+        
+        std::cout << "=================================================================" <<std::endl;
+        std::cout << "Host to be called: " << url <<std::endl;
+        std::cout << request.getMethod() <<std::endl;
+        std::cout << request.getUrl() <<std::endl;
+        std::cout << request.getVersion() <<std::endl;
+        std::cout << "=================================================================" <<std::endl;
+        
+        host = new char[url.size() + 1];
+        std::strcpy(host, url.c_str());
+        
+        char *port = new char[portno.size()+1];
+        std::strcpy(port, portno.c_str());
+        
+        int socketServer = createserverSocket(host, port);
+        
+        writeToserverSocket(str, socketServer, str.size());
+        std::string response_from_server = readFromServer(socketServer);
+        
+        if(redirection_allowed > 1){ //deny_terms rule
+            if(findString(deny_terms, response_from_server)){
+                isForbidden = true;
+            }
+        }
+        
+        if(!isForbidden){
+            // writing to client
+            writeToclientSocket(&response_from_server[0], socketClient, response_from_server.size());
+        }
+        //Close the server socket
+        close(socketServer);
+       
+    }
     
-    if(address.size() == 3)
-        portno = address.at(2);
+    if(isForbidden){
+        std::string forbidden = getForbiddenResponse();
+        writeToclientSocket(forbidden, socketClient, forbidden.size());
+    }
     
-    std::vector<std::string> add = split(address.at(1), "//");
-    
-    std::string url =add.at(1);
-    std::vector<std::string> host_split = split(url, "/");
-    url = host_split.at(0);
-    
-    std::cout << "=================================================================" <<std::endl;
-    std::cout << "Host to be called: " << url <<std::endl;
-    std::cout << request.getMethod() <<std::endl;
-    std::cout << request.getUrl() <<std::endl;
-    std::cout << request.getVersion() <<std::endl;
-    std::cout << "=================================================================" <<std::endl;
-    
-    host = new char[url.length() + 1];
-    std::strcpy(host, url.c_str());
-    
-    char *port = new char[portno.size()+1];
-    std::strcpy(port, portno.c_str());
-    
-    int socketServer = createserverSocket(host, port);
-    
-    writeToserverSocket(str, socketServer, str.length());
-    writeToClient(socketClient, socketServer);
-    
-    //Close the sockets
+    //Close the Client socket
     close(socketClient);
-    close(socketServer);
+    
 }
 
 
 int main(int argc , char *argv[])
-{
+{   
+    //Read filter files
+    whitelist = readFile(PATH_WHITELIST, PARSER_TOKEN);
+    blacklist = readFile(PATH_BLACKLIST, PARSER_TOKEN);
+    deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
+    
     struct sockaddr_in address;
     std::vector<Client> client_socket;
     

@@ -12,7 +12,18 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <time.h>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 
 std::vector<std::string> split(std::string, std::string);
+
+std::vector<std::string> readFile(std::string, std::string);
+
+bool findString(std::vector<std::string>, std::string);
+
+std::string getForbiddenResponse();
 #endif /* utils_hpp */
+

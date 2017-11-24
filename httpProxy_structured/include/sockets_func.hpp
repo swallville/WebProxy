@@ -30,7 +30,7 @@
 int createserverSocket(std::string, std::string);
 void writeToserverSocket(std::string, int, int);
 void writeToclientSocket(std::string, int, int);
-void writeToClient (int, int);
+std::string readFromServer (int);
 
 
 #endif /* sockets_func_hpp */

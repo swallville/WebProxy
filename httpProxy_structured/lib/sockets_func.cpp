@@ -79,16 +79,18 @@ void writeToclientSocket(std::string message, int sockfd, int size)
     
 }
 
-void writeToClient (int Clientfd, int Serverfd) {
+std::string readFromServer (int Serverfd) {
     
     int recieved;
     
     std::string output;
     output.resize(MAX_BUFFER_SIZE);
     
+    std::string result = "";
+    
     while ((recieved = recv(Serverfd, &output[0], MAX_BUFFER_SIZE, 0)) > 0) {
-        writeToclientSocket(&output[0], Clientfd, recieved);         // writing to client
         //memset(buf,0,sizeof buf);
+        result.append(output);
         output.clear();
     }
     
@@ -97,5 +99,7 @@ void writeToClient (int Clientfd, int Serverfd) {
         std::cout << "Error recieved while recieving message response from server" << std::endl;
         //exit (1);
     }
+    
+    return result;
 }
 
