@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <cstring>
 #include "httpRequest.hpp"
 
 HttpRequest parserRequest(std::string);

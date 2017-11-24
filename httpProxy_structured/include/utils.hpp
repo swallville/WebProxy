@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <cstring>
 #include <vector>
 #include <time.h>
 #include <fstream>
@@ -26,4 +27,3 @@ bool findString(std::vector<std::string>, std::string);
 
 std::string getForbiddenResponse();
 #endif /* utils_hpp */
-

@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <vector>
 
