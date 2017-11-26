@@ -26,12 +26,19 @@
 #include <iostream>
 #include <vector>
 
-#define MAX_BUFFER_SIZE 60000
+#define MAX_BUF_SIZE 1500
+
+struct Buffer{
+    char step[MAX_BUF_SIZE];
+    int buff_len;
+};
 
 int createserverSocket(std::string, std::string);
 void writeToserverSocket(std::string, int, int);
 void writeToclientSocket(std::string, int, int);
-std::string readFromServer (int);
+void writeToclientSocket(std::vector<Buffer>, int);
+std::vector<Buffer> readFromServer (int);
+std::string readFromSocket (int*);
 
 
 #endif /* sockets_func_hpp */

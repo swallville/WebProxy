@@ -8,12 +8,12 @@
 
 //Handle multiple socket connections with select and fd_set on Linux
 
+#include <pthread.h>
+#include <time.h>
 #include "httpRequest.hpp"
-#include "utils.hpp"
 #include "sockets_func.hpp"
 #include "parser.hpp"
-
-#include <time.h>
+#include "utils.hpp"
 
 #define TRUE 1
 #define FALSE 0
@@ -23,6 +23,7 @@
 #define PATH_BLACKLIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/blacklist.txt"
 #define PATH_DENY_TERMS "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/deny_terms.txt"
 #define PARSER_TOKEN "\n"
+
 
 std::vector<std::string> whitelist;
 std::vector<std::string> blacklist;
@@ -41,6 +42,7 @@ struct Client
     int socket;
 };
 
+
 int allowRedirection(HttpRequest request, std::string message){
     //Is the url in the whitelist?
     if(findString(whitelist, request.getUrl())){
@@ -58,9 +60,8 @@ int allowRedirection(HttpRequest request, std::string message){
     return true;
 }
 
-void redirect(std::string str, int socketClient){
-    HttpRequest request = parserRequest(str);
-
+void redirectMessage(HttpRequest request, std::string str, int socketClient)
+{
     int redirection_allowed = allowRedirection(request, str);
     bool isForbidden = false;
 
@@ -77,7 +78,12 @@ void redirect(std::string str, int socketClient){
 
         std::vector<std::string> add = split(address.at(1), "//");
 
-        std::string url =add.at(1);
+        std::string url = "";
+        if(add.size() > 1)
+            url =add.at(1);
+        else
+            url = add.at(0);
+
         std::vector<std::string> host_split = split(url, "/");
         url = host_split.at(0);
 
@@ -95,23 +101,38 @@ void redirect(std::string str, int socketClient){
         std::strcpy(port, portno.c_str());
 
         int socketServer = createserverSocket(host, port);
-
-        writeToserverSocket(str, socketServer, str.size());
-        std::string response_from_server = readFromServer(socketServer);
-
-        if(redirection_allowed > 1){ //deny_terms rule
-            if(findString(deny_terms, response_from_server)){
-                isForbidden = true;
+        
+        if(socketServer != -1){
+            struct timeval tv;
+            tv.tv_sec = 1;  /* 1 Sec Timeout - Important for reading buffers from server socket */
+            setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
+            
+            writeToserverSocket(str, socketServer, str.size());
+            std::vector<Buffer> response_from_server = readFromServer(socketServer);
+            
+            if(redirection_allowed > 1){ //deny_terms rule
+                for(int i=0; i<response_from_server.size(); i++){
+                    if(findString(deny_terms, response_from_server.at(i).step)){
+                        isForbidden = true;
+                        break;
+                    }
+                }
             }
+            
+            if(!isForbidden){
+                // writing to client
+                writeToclientSocket(response_from_server, socketClient);
+            }
+            //Close the server socket
+            close(socketServer);
+        }else{
+            close(socketServer);
+            return;
         }
 
-        if(!isForbidden){
-            // writing to client
-            writeToclientSocket(&response_from_server[0], socketClient, response_from_server.size());
-        }
-        //Close the server socket
-        close(socketServer);
-
+    }else{
+        isForbidden = true;
+       
     }
 
     if(isForbidden){
@@ -124,6 +145,20 @@ void redirect(std::string str, int socketClient){
 
 }
 
+void beginExecution(int* sockid)
+{
+    std::string str = readFromSocket(sockid);
+    
+    if(str.length() == 0){
+        return;
+    }
+    
+    HttpRequest request = parserRequest(str);
+    
+    redirectMessage(request, str, *sockid);
+    /*final request to be sent*/
+
+}
 
 int main(int argc , char *argv[])
 {
@@ -131,98 +166,108 @@ int main(int argc , char *argv[])
     whitelist = readFile(PATH_WHITELIST, PARSER_TOKEN);
     blacklist = readFile(PATH_BLACKLIST, PARSER_TOKEN);
     deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
-
+    
     struct sockaddr_in address;
     std::vector<Client> client_socket;
-
+    
     //Creating the main socket
-    int main_socket_id = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
+    int main_socket_id = socket(AF_INET, SOCK_STREAM, 0);
+    
     if (main_socket_id < 0)
     {
         std::cout << "Error on creating the main server socket" << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    
     //Allow main socket to accept multiple connections
     int allow_multiple_connections = TRUE;
-
+    
     if (setsockopt(main_socket_id, SOL_SOCKET, SO_REUSEADDR, (char *)&allow_multiple_connections, sizeof(allow_multiple_connections)) < 0)
     {
         std::cout << "Error on allowing multiple connections in the socket" << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    
     //Setting the characteristics of a socket address
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
-
+    
     //Bind the socket to the defined port
     if (bind(main_socket_id, (struct sockaddr *)&address, sizeof(address)) < 0)
     {
         std::cout << "Error on binding the main socket" << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    
+    //signal(SIGPIPE, SIG_IGN);
     std::cout << "SERVER IS LISTENING ON PORT " << PORT << std::endl;
-
+    
     //Set maximim requests on the server queue
     if (listen(main_socket_id, MAX_CONNECTIONS) < 0)
     {
         std::cout << "Error while specifying trying to listen the socket" << std:: endl;
         exit(EXIT_FAILURE);
     }
-
-
+    
+    
     std::cout << "SERVER IS WAITING FOR CONNECTIONS..." << std::endl;
-
+    
     while (TRUE)
     {
-        //Creating a set of socket descriptors
-        fd_set socket_descriptors;
-        //Clear the socket descriptor
-        FD_ZERO(&socket_descriptors);
-        //Add a descriptor to the set of socket descriptors
-        FD_SET(main_socket_id, &socket_descriptors);
-
-        int max_socket = main_socket_id;
-
+        //set of socket descriptors
+        fd_set readfds;
+        // Clear a fd_set
+        FD_ZERO(&readfds);                  //clear the socket set
+        // Add a descriptor to an fd_set
+        FD_SET(main_socket_id, &readfds);    //add master socket to set
+        
+        int max_sd = main_socket_id;
+        
         //add child sockets to set
         for (size_t i = 0; i < client_socket.size(); ++i)
         {
-            //Adding a descriptor to the set
-            FD_SET(client_socket[i].socket, &socket_descriptors);
-            max_socket = std::max(max_socket, client_socket[i].socket);
+            // Add a descriptor to an fd_set
+            FD_SET(client_socket[i].socket, &readfds);
+            max_sd = std::max(max_sd, client_socket[i].socket);
         }
-
-        //Creating a type of thread: a select. Wait indefinitely until someone requests something
-        int activity = select( max_socket + 1 , &socket_descriptors , NULL , NULL , NULL);
-
-        if ((activity < 0) && (errno != EINTR)){
-            std::cout << "Error on creating a select process" << std::endl;
+        
+        //wait for an activity on one of the sockets , timeout is NULL , so wait indefinitely
+        int activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
+        
+        if ((activity < 0) && (errno != EINTR))
+        {
+            printf("select error");
+            //close(max_sd+1);
         }
-
-        for (std::vector<Client>::iterator p = client_socket.begin(); p != client_socket.end(); ){
-            char buffer[1024];
-
-            //Incoming connection
-            if (FD_ISSET(p->socket, &socket_descriptors))
+        signal(SIGPIPE, SIG_IGN);
+        
+        //else its some IO operation on some other socket :)
+        for (std::vector<Client>::iterator p = client_socket.begin(); p != client_socket.end(); )
+        {
+            char buffer[1024]; //data buffer of 1K
+            
+            //If something happened on the master socket , then its an incoming connection
+            if (FD_ISSET(p->socket, &readfds))
             {
-                //Read incoming message
+                //Check if it was for closing , and also read the incoming message
                 long valread = recv(p->socket, buffer, sizeof(buffer), 0);
-
-                if (valread <= 0){
-                    //It is a Disconnected
+                
+                if (valread <= 0)
+                {
+                    //Somebody disconnected , get his details and print
                     socklen_t addrlen = sizeof(address);
                     getpeername(p->socket, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-
-                    std::cout << "A host disconneted - IP: " << inet_ntoa(address.sin_addr) << "; PORT: " << ntohs(address.sin_port) << std::endl;
-
-                    //Close the socket and allow reuse of it
+                    
+                    printf("Host disconnected , ip %s , port %d \n" , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
+                    
+                    //Close the socket and mark as 0 in list for reuse
                     close(p->socket);
                     p = client_socket.erase(p);
-                } else {
+                }
+                //Echo back the message that came in
+                else
+                {
                     ++p;
                 }
             }
@@ -231,40 +276,31 @@ int main(int argc , char *argv[])
                 ++p;
             }
         }
-
-        //Incomming connection
-        if (FD_ISSET(main_socket_id, &socket_descriptors))
+        
+        //If something happened on the master socket , then its an incoming connection
+        if (FD_ISSET(main_socket_id, &readfds))
         {
+            //accept the incoming connection
             socklen_t addrlen = sizeof(address);
-
-            //Accepting the incomming connection
+            
             int new_socket = accept(main_socket_id, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-
-            if (new_socket < 0) {
-                std::cout << "Error on accepting the incomming message" << std::endl;
+            
+            if (new_socket < 0)
+            {
+                perror("accept");
                 exit(EXIT_FAILURE);
             }
-
-            std::cout << "New client requesting a service - IP: " << inet_ntoa(address.sin_addr) << " - PORT: " << ntohs(address.sin_port) << " - Socket to client: " << new_socket << std::endl;
-
-            std::string output;
-            output.resize(MAX_BUFFER_SIZE);
-
-            long size;
-
-            if((size = recv(new_socket,  &output[0] , MAX_BUFFER_SIZE-1 , 0)) < 0){
-                std::cout << "Error on recieving the request from client " << std::endl;
-            }
-
-            output[size] = 0;
-            std::cout << "========== REQUEST: ========" << std::endl;
-            std::cout << output.c_str() << std::endl;
-
-            redirect(output, new_socket);
-            Client socket_in(new_socket);
-            client_socket.push_back(socket_in);
+            
+            //inform user of socket number - used in send and receive commands
+            printf("New connection , socket fd is %d , ip is : %s , port : %d \n", new_socket, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+            
+            beginExecution(&new_socket);
+            
+            //add new socket to array of sockets
+            Client client(new_socket);
+            client_socket.push_back(client);
         }
     }
-
+    
     return 0;
 }

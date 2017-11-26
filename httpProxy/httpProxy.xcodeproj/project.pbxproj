@@ -12,7 +12,7 @@
 		B695B5821FC4E9CC00723D11 /* sockets_func.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B695B5801FC4E9CC00723D11 /* sockets_func.cpp */; };
 		B695B5851FC4F41E00723D11 /* parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B695B5831FC4F41E00723D11 /* parser.cpp */; };
 		B695B58D1FC6594B00723D11 /* response_content.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B695B58B1FC6594B00723D11 /* response_content.cpp */; };
-		B695B5901FC6674900723D11 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B695B58E1FC6674900723D11 /* utils.cpp */; };
+		B695B5B01FCA628E00723D11 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B695B5AE1FCA628D00723D11 /* utils.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,8 +41,8 @@
 		B695B5891FC646C200723D11 /* whitelist.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = whitelist.txt; sourceTree = "<group>"; };
 		B695B58B1FC6594B00723D11 /* response_content.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = response_content.cpp; sourceTree = "<group>"; };
 		B695B58C1FC6594B00723D11 /* response_content.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = response_content.hpp; sourceTree = "<group>"; };
-		B695B58E1FC6674900723D11 /* utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
-		B695B58F1FC6674900723D11 /* utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
+		B695B5AE1FCA628D00723D11 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utils.cpp; sourceTree = "<group>"; };
+		B695B5AF1FCA628D00723D11 /* utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utils.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +75,8 @@
 		3A0B98F51FBC77E5008BD7DD /* httpProxy */ = {
 			isa = PBXGroup;
 			children = (
+				B695B5AE1FCA628D00723D11 /* utils.cpp */,
+				B695B5AF1FCA628D00723D11 /* utils.hpp */,
 				B695B5871FC646C100723D11 /* blacklist.txt */,
 				B695B5881FC646C100723D11 /* deny_terms.txt */,
 				B695B5891FC646C200723D11 /* whitelist.txt */,
@@ -87,8 +89,6 @@
 				B695B5841FC4F41E00723D11 /* parser.hpp */,
 				B695B58B1FC6594B00723D11 /* response_content.cpp */,
 				B695B58C1FC6594B00723D11 /* response_content.hpp */,
-				B695B58E1FC6674900723D11 /* utils.cpp */,
-				B695B58F1FC6674900723D11 /* utils.hpp */,
 			);
 			path = httpProxy;
 			sourceTree = "<group>";
@@ -153,7 +153,7 @@
 				B695B58D1FC6594B00723D11 /* response_content.cpp in Sources */,
 				B695B5851FC4F41E00723D11 /* parser.cpp in Sources */,
 				B695B5821FC4E9CC00723D11 /* sockets_func.cpp in Sources */,
-				B695B5901FC6674900723D11 /* utils.cpp in Sources */,
+				B695B5B01FCA628E00723D11 /* utils.cpp in Sources */,
 				3A0B98F71FBC77E5008BD7DD /* main.cpp in Sources */,
 				B62DE0EF1FBC9F2100CCB08A /* httpRequest.cpp in Sources */,
 			);
@@ -196,7 +196,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -251,7 +251,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
