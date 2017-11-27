@@ -71,3 +71,31 @@ void HttpRequest::print(){
     std::cout << "------- End of Request Message: -------" << std::endl;
 }
 
+std::string HttpRequest::getHost(){
+    std::vector<std::string> split_url = split(url, "http://");
+    int pos_first_slash = split_url.at(1).find_first_of("/");
+    
+    std::string host_port = split_url.at(1).substr(0, pos_first_slash);
+    
+    std::vector<std::string> host = split(host_port, ":");
+    
+    return host.at(0);
+    
+}
+
+std::string HttpRequest::getPort(){
+    std::vector<std::string> split_url = split(url, "http://");
+    int pos_first_slash = split_url.at(1).find_first_of("/");
+    
+    std::string host_port = split_url.at(1).substr(0, pos_first_slash);
+    
+    std::vector<std::string> host = split(host_port, ":");
+    
+    if(host.size() == 2)
+        return host.at(1);
+    
+    return "80";
+    
+}
+
+
