@@ -26,4 +26,6 @@ std::vector<std::string> readFile(std::string, std::string);
 bool findString(std::vector<std::string>, std::string);
 
 std::string getForbiddenResponse();
+
+int hostname_to_ip(std::string hostname , std::string& ip);
 #endif /* utils_hpp */
