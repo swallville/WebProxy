@@ -8,6 +8,8 @@
 
 //Handle multiple socket connections with select and fd_set on Linux
 
+#include <iostream>
+#include <fstream>
 #include <pthread.h>
 #include <time.h>
 #include "httpRequest.hpp"
@@ -19,9 +21,9 @@
 #define FALSE 0
 #define PORT 8000
 #define MAX_CONNECTIONS 100
-#define PATH_WHITELIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/whitelist.txt"
-#define PATH_BLACKLIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/blacklist.txt"
-#define PATH_DENY_TERMS "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/deny_terms.txt"
+#define PATH_WHITELIST "whitelist.txt"
+#define PATH_BLACKLIST "blacklist.txt"
+#define PATH_DENY_TERMS "deny_terms.txt"
 #define PARSER_TOKEN "\n"
 #define DIE exit(1);
 
@@ -118,6 +120,35 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
         writeToclientSocket(forbidden, socketClient, forbidden.size());
     }
 
+    std::ofstream output_file;
+    output_file.open("log.txt", std::ios::in | std::fstream::out | std::fstream::app);
+
+    char dt[1000];
+
+    time_t t = time(0);
+    struct tm * p = localtime(&t);
+
+    strftime(dt, 1000, "%A, %B %d %Y, %H:%M:%S", p);
+
+    std::string log_message;
+
+    if(redirection_allowed == 0){
+        log_message.append("Tried to access the following forbidden website." + request.getHost());
+    }
+    else if(redirection_allowed == 1){
+        log_message.append("Access to website " + request.getHost() + " authorized.");
+    }
+    else if(redirection_allowed == 2){
+        log_message.append("Access to website " + request.getHost() + " denied because of deny terms.");
+    }
+    else{
+        log_message.append("Access to website " + request.getHost() + " authorized.");
+    }
+
+    output_file << dt << " - " << log_message << "\n";
+
+    output_file.close();
+
     //Close the Client socket
     close(socketClient);
 
@@ -149,7 +180,7 @@ int main(int argc , char *argv[])
     deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
     
     struct sockaddr_in address;
-    
+
     //Creating the main socket
     int main_socket_id = socket(AF_INET, SOCK_STREAM, 0);
     
@@ -211,14 +242,14 @@ int main(int argc , char *argv[])
             
         //inform user of socket number - used in send and receive commands
         printf("New connection , socket fd is %d , ip is : %s , port : %d \n", new_socket, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
-        
+
         pthread_t thread;
-        
+
         if(pthread_create(&thread, NULL, &beginExecution, (void*)(intptr_t)new_socket) < 0) {
             std::cout << "Error creating thread.. exiting" << std::endl;
             DIE
         }
-        
+
         pthread_detach(thread);
         thread = NULL;
     }
