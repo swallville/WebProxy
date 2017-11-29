@@ -6,6 +6,12 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+/**
+ * @file httpRequest.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo com a implementacao da classe que representa um HttpRequest
+ */
+
 #include "httpRequest.hpp"
 #include <stdio.h>
 #include <iostream>

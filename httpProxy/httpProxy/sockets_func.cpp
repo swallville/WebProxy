@@ -6,6 +6,12 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+/**
+ * @file sockets_func.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo com a implementacao dos metodos que fazem as interacoes com os sockets
+ */
+
 #include "sockets_func.hpp"
 #include "utils.hpp"
 

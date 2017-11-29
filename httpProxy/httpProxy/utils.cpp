@@ -6,6 +6,12 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+/**
+ * @file utils.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo com implementacao de protótipos de funcoes gerais que podem ser utilizadas em qualquer tempo do codigo.
+ */
+
 #include "utils.hpp"
 #include "response_content.hpp"
 

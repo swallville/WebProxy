@@ -6,8 +6,11 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-//Handle multiple socket connections with select and fd_set on Linux
-
+/**
+ * @file main.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo que contem a funcao inicial do programa e contem a logica de redirecionamento das mensagens.
+ */
 #include <pthread.h>
 #include <time.h>
 #include "httpRequest.hpp"
@@ -25,11 +28,29 @@
 #define PARSER_TOKEN "\n"
 #define DIE exit(1);
 
-
+/**
+ * @value whitelist Armazena a lista de url's autorizadas pelo administrador do proxy
+ */
 std::vector<std::string> whitelist;
+
+/**
+ * @value blacklist Armazena a lista de url's proibidas pelo administrador do proxy
+ */
 std::vector<std::string> blacklist;
+
+/**
+ * @value whitelist Armazena a lista de termos proibidos pelo administrador do proxy
+ */
 std::vector<std::string> deny_terms;
 
+
+/**
+ *   @fn int allowRedirection(HttpRequest, std::string)
+ *   @brief Função que verifica se uma determinada url pode ser acessada, ou seja se esta na whitelist, blacklist ou se o request possui termos proibidos
+ *   @param request Objeto HttpRequest representando o request recebido.
+ *   @param message String com a mensagem original do request recebido pelo proximo.
+ *   @return int entre 0 e 3, onde os numeros impares representam true e os pares representam o valor false
+ */
 int allowRedirection(HttpRequest request, std::string message){
     //Is the url in the whitelist?
     if(findString(whitelist, request.getUrl())){
@@ -47,6 +68,13 @@ int allowRedirection(HttpRequest request, std::string message){
     return true;
 }
 
+/**
+ *   @fn void redirectMessage(HttpRequest, std::string, int)
+ *   @brief Função que processa, redireciona e retorna ao cliente a resposta do request recebido
+ *   @param request Objeto HttpRequest representando o request recebido.
+ *   @param str String com a mensagem original do request recebido pelo proximo.
+ *   @param socketClient Id represenatndo o socket que liga o proxy ao cliente que solicitou o servico.
+ */
 void redirectMessage(HttpRequest request, std::string str, int socketClient)
 {
     int redirection_allowed = allowRedirection(request, str);
@@ -123,6 +151,12 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
 
 }
 
+/**
+ *   @fn static void* beginExecution(void*)
+ *   @brief Função que executa a thread processando o request e devolvendo a resposta para o cliente de origem
+ *   @param sockfdPtr struct representando o socket que liga o proxy server ao cliente do request.
+ *   @return static void* retorna ponteiro para null
+ */
 static void* beginExecution(void* sockfdPtr)
 {
     int sockid = (intptr_t)sockfdPtr;
@@ -141,6 +175,13 @@ static void* beginExecution(void* sockfdPtr)
     return (void*)NULL;
 }
 
+/**
+ *   @fn int main(int, char *)
+ *   @brief Função que inicializa o programa
+ *   @param argc quantidade de parametros passados para o programa
+ *   @param argv parametros passados na execucao do programa
+ *   @return int 1 se erro; 0 se a execucao do programa termina sem erros
+ */
 int main(int argc , char *argv[])
 {
     //Read filter files
