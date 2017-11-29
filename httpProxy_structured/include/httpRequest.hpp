@@ -14,6 +14,7 @@
 #include <cstring>
 #include <vector>
 #include <ctime>
+#include "utils.hpp"
 
 class HttpRequest{
 
@@ -39,6 +40,8 @@ public:
     std::string getVersion();
     std::vector<std::string> getHeaders();
     std::string getEntityBody();
+    std::string getHost();
+    std::string getPort();
 
     void print();
 

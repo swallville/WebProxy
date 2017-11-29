@@ -21,7 +21,10 @@ HttpRequest parserRequest(std::string str){
     
     std::vector<std::string> line1 = split(firstLine, " ");
     request.setMethod(line1.at(0));
-    request.setUrl(line1.at(1));
+    
+    //if(line1.size() > 1)
+        request.setUrl(line1.at(1));
+        
     request.setVersion(line1.at(2));
     
     for(int i=1; i<size-1; i++){
