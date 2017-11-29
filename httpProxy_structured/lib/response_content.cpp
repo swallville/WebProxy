@@ -6,6 +6,12 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+/**
+ * @file response_content.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo com a implementacao dos metodos que criam mensagens http de response especificas de erros e afins
+ */
+
 #include "response_content.hpp"
 
 std::string getForbidden(){
@@ -25,3 +31,4 @@ std::string getForbidden(){
 
     return response;
 }
+
