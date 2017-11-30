@@ -6,7 +6,7 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-#include "httpRequest.hpp"
+#include "../include/httpRequest.hpp"
 #include <stdio.h>
 #include <iostream>
 

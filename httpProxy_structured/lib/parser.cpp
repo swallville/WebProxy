@@ -6,8 +6,8 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-#include "parser.hpp"
-#include "utils.hpp"
+#include "../include/parser.hpp"
+#include "../include/utils.hpp"
 
 
 HttpRequest parserRequest(std::string str){

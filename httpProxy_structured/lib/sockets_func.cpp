@@ -6,8 +6,8 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-#include "sockets_func.hpp"
-#include "utils.hpp"
+#include "../include/sockets_func.hpp"
+#include "../include/utils.hpp"
 
 int createserverSocket(std::string address, std::string port) {
     std::cout << "CREATE SERVER SOCKET" << std::endl;

@@ -8,8 +8,8 @@
 
 #include <netdb.h>
 #include <arpa/inet.h>
-#include "utils.hpp"
-#include "response_content.hpp"
+#include "../include/utils.hpp"
+#include "../include/response_content.hpp"
 
 std::vector<std::string> split(std::string str, std::string token){
     std::vector<std::string>result;

@@ -12,10 +12,10 @@
 #include <fstream>
 #include <pthread.h>
 #include <time.h>
-#include "httpRequest.hpp"
-#include "sockets_func.hpp"
-#include "parser.hpp"
-#include "utils.hpp"
+#include "../include/httpRequest.hpp"
+#include "../include/sockets_func.hpp"
+#include "../include/parser.hpp"
+#include "../include/utils.hpp"
 
 #define TRUE 1
 #define FALSE 0

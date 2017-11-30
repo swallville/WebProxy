@@ -6,7 +6,7 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-#include "response_content.hpp"
+#include "../include/response_content.hpp"
 
 std::string getForbidden(){
     std::string response = "";
