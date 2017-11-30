@@ -128,24 +128,32 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
     time_t t = time(0);
     struct tm * p = localtime(&t);
 
-    strftime(dt, 1000, "%A, %B %d %Y, %H:%M:%S", p);
+    strftime(dt, 1000, "[%d/%b/%Y:%H:%M:%S %z]", p);
 
-    std::string log_message;
+    std::string http_status_code;
+    std::string ip_addr;
+
+    hostname_to_ip(request.getHost(), ip_addr);
 
     if(redirection_allowed == 0){
-        log_message.append("Tried to access the following forbidden website." + request.getHost());
+        http_status_code = "403";
     }
     else if(redirection_allowed == 1){
-        log_message.append("Access to website " + request.getHost() + " authorized.");
+        http_status_code = "200";
     }
     else if(redirection_allowed == 2){
-        log_message.append("Access to website " + request.getHost() + " denied because of deny terms.");
+        http_status_code = "403";
     }
     else{
-        log_message.append("Access to website " + request.getHost() + " authorized.");
+        http_status_code = "200";
     }
 
-    output_file << dt << " - " << log_message << "\n";
+    std::string version = request.getVersion();
+    remove_tags(version);
+
+    output_file << ip_addr << " - " << dt << " '" << request.getMethod()
+                << " " << request.getUrl() << " " << version << "' " << http_status_code
+                << "\n";
 
     output_file.close();
 
