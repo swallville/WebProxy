@@ -22,9 +22,9 @@
 #define FALSE 0
 #define PORT 8000
 #define MAX_CONNECTIONS 100
-#define PATH_WHITELIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/whitelist.txt"
-#define PATH_BLACKLIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/blacklist.txt"
-#define PATH_DENY_TERMS "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/deny_terms.txt"
+#define PATH_WHITELIST "whitelist.txt"
+#define PATH_BLACKLIST "blacklist.txt"
+#define PATH_DENY_TERMS "deny_terms.txt"
 #define PARSER_TOKEN "\n"
 #define DIE exit(1);
 
@@ -107,12 +107,12 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
             tv.tv_sec = 5;  /* 1 Sec Timeout - Important for reading buffers from server socket */
             setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
             
-            writeToserverSocket(str, socketServer, str.size());
+            writeToserverSocket(str, socketServer, (int)str.size());
             std::vector<Buffer> response_from_server = readFromServer(socketServer);
             
             if(response_from_server.size() > 0){
                 if(redirection_allowed > 1){ //deny_terms rule
-                    for(int i=0; i<response_from_server.size(); i++){
+                    for(int i = 0; i < response_from_server.size(); i++){
                         if(findString(deny_terms, response_from_server.at(i).step)){
                             isForbidden = true;
                             break;
@@ -143,7 +143,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
 
     if(isForbidden){
         std::string forbidden = getForbiddenResponse();
-        writeToclientSocket(forbidden, socketClient, forbidden.size());
+        writeToclientSocket(forbidden, socketClient, (int)forbidden.size());
     }
 
     //Close the Client socket
@@ -159,8 +159,9 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
  */
 static void* beginExecution(void* sockfdPtr)
 {
-    int sockid = (intptr_t)sockfdPtr;
-    std::string str = readFromSocket(&sockid);
+    long sockid = (intptr_t)sockfdPtr;
+    int sockid_cast = (int)sockid;
+    std::string str = readFromSocket(&sockid_cast);
     
     if(str.length() == 0){
         return (void*)NULL;
@@ -168,7 +169,7 @@ static void* beginExecution(void* sockfdPtr)
     
     HttpRequest request = parserRequest(str);
     
-    redirectMessage(request, str, sockid);
+    redirectMessage(request, str, sockid_cast);
     /*final request to be sent*/
 
     std::cout << "END OF ROUTINE ..." <<std::endl << std::endl;
