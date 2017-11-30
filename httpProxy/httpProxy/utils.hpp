@@ -29,5 +29,5 @@ std::string getForbiddenResponse();
 
 int hostname_to_ip(std::string hostname , std::string& ip);
 
-std::string remove_tags(std::string& str);
+void remove_tags(std::string& str);
 #endif /* utils_hpp */
