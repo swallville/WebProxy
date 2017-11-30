@@ -149,16 +149,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
     }
 
     std::string version = request.getVersion();
-    std::size_t found;
-    found = version.find('\n');
-    if(found == std::string::npos)
-        found = version.find('\r');
-    while ( found != std::string::npos) {
-        version.replace(found, 1, " ");
-        found = version.find('\n');
-        if(found == std::string::npos)
-            found = version.find('\r');
-    }
+    remove_tags(version);
 
     output_file << ip_addr << " - " << dt << " '" << request.getMethod()
                 << " " << request.getUrl() << " " << version << "' " << http_status_code

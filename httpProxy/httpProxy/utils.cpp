@@ -140,3 +140,16 @@ int hostname_to_ip(std::string hostname , std::string &ip)
 
     return 1;
 }
+
+std::string remove_tags(std::string& str){
+    std::size_t found;
+    found = str.find('\n');
+    if(found == std::string::npos)
+        found = str.find('\r');
+    while ( found != std::string::npos) {
+        str.replace(found, 1, " ");
+        found = str.find('\n');
+        if(found == std::string::npos)
+            found = str.find('\r');
+    }
+}
