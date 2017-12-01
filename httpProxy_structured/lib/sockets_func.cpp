@@ -57,11 +57,10 @@ void writeToserverSocket(std::string message, int sockfd, int size)
 {
     std::cout << "WRITING TO SERVER SOCKET " << sockfd << std::endl;
     int sent = 0;
-    int sent_step;
-    
-    
+    long sent_step;
+
     while (sent < size) {
-        if ((sent_step = send(sockfd, (void *) (&message[0] + sent), size - sent, 0)) < 0) {
+        if ((sent_step = send(sockfd, (void *) (&message[0] + sent), (long)(size - sent), 0)) < 0) {
             std::cout << "Error recieved while sending message to the server!" <<std::endl;
             exit (1);
         }
@@ -74,7 +73,7 @@ void writeToserverSocket(std::string message, int sockfd, int size)
 void writeToclientSocket(std::string message, int sockfd, int size)
 {
     std::cout << "WRITING TO CLIENT SOCKET " << sockfd << std::endl;
-    std::cout << "Message to send: " << std::endl;
+    std::cout << "Message to sendd: " << std::endl;
     std::cout << message << std::endl;
     std::cout << size << std::endl;
    
@@ -84,10 +83,10 @@ void writeToclientSocket(std::string message, int sockfd, int size)
     
     buff_to_server[size] = '\0';
     int totalsent = 0;
-    int senteach;
+    long senteach;
     
     while (totalsent < size) {
-        if ((senteach = send(sockfd, (void *) (buff_to_server + totalsent), size - totalsent, 0)) < 0) {
+        if ((senteach = send(sockfd, (void *) (buff_to_server + totalsent), (long)(size - totalsent), 0)) < 0) {
             fprintf (stderr," Error in sending to server ! \n");
             exit (1);
         }
@@ -107,7 +106,7 @@ void writeToclientSocket(std::vector<Buffer> result, int sockfd)
     std::cout << "INto write" << std::endl;
     for(int i=0; i<result.size(); i++){
         int totalsent = 0;
-        int senteach;
+        long senteach;
         int buff_length = result.at(i).buff_len;
         
         while (totalsent < buff_length) {
@@ -130,8 +129,7 @@ void writeToclientSocket(std::vector<Buffer> result, int sockfd)
 std::vector<Buffer> readFromServer (int Serverfd) {
     std::cout << " ======== READING FROM SERVER ===========" << Serverfd << std::endl;
     
-    int iRecv;
-    int total = MAX_BUF_SIZE;
+    long iRecv;
     char buf[MAX_BUF_SIZE];
     
     struct timeval tv;
@@ -140,10 +138,10 @@ std::vector<Buffer> readFromServer (int Serverfd) {
     
     std::vector<struct Buffer> result;
     
-    while ((iRecv = recv(Serverfd, buf, MAX_BUF_SIZE, 0)) > 0 ) {
+    while ((iRecv = recv(Serverfd, buf, (long)MAX_BUF_SIZE, 0)) > 0 ) {
         struct Buffer item;
         memcpy(item.step, buf, iRecv);
-        item.buff_len = iRecv;
+        item.buff_len = (int)iRecv;
         result.push_back(item);
         memset(buf,0,MAX_BUF_SIZE);
     }
@@ -169,8 +167,8 @@ std::string readFromSocket (int* socketId){
     int total_recieved_bits = 0;
     
     while (strstr(request_message, "\r\n\r\n") == NULL) {  // determines end of request
-        int recvd = recv(*socketId, buf, MAX_BUF_SIZE, 0) ;
-        if(recvd < 0 ){
+        long recvd = recv(*socketId, buf, MAX_BUF_SIZE, 0) ;
+        if(recvd < (long)0 ){
             std::cout << "An error has occurred while receiving message from socket" << std::endl;
             //exit (1);
         }else if(recvd == 0) {

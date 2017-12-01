@@ -6,6 +6,12 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+/**
+ * @file response_content.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo com a implementacao dos metodos que criam mensagens http de response especificas de erros e afins
+ */
+
 #include "response_content.hpp"
 
 std::string getForbidden(){
@@ -19,7 +25,7 @@ std::string getForbidden(){
     response.append("<body>");
     response.append("<h1 style=\"color: #5e9ca0;\"> <span style=\"color: #2b2301;\">Website not allowed!</span> </h1>");
     response.append("<h2 style=\"color: #2e6c80;\">Error Code: 403 Forbidden</h2>");
-    response.append("<p>Either the requested url is not allowed by the Administrator or the page contains disallowed terms. <br />If you believe this is not rigth, please contact the Administration.&nbsp;</p>");
+    response.append("<p>Either the requested url is not allowed by the Administrator or the page contains disallowed terms. <br />If you believe this is not right, please contact the Administration.&nbsp;</p>");
     response.append("</body>");
     response.append("</html>");
 

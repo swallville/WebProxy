@@ -27,11 +27,29 @@
 #define PARSER_TOKEN "\n"
 #define DIE exit(1);
 
-
+/**
+ * @value whitelist Armazena a lista de url's autorizadas pelo administrador do proxy
+ */
 std::vector<std::string> whitelist;
+
+/**
+ * @value blacklist Armazena a lista de url's proibidas pelo administrador do proxy
+ */
 std::vector<std::string> blacklist;
+
+/**
+ * @value whitelist Armazena a lista de termos proibidos pelo administrador do proxy
+ */
 std::vector<std::string> deny_terms;
 
+
+/**
+ *   @fn int allowRedirection(HttpRequest, std::string)
+ *   @brief Função que verifica se uma determinada url pode ser acessada, ou seja se esta na whitelist, blacklist ou se o request possui termos proibidos
+ *   @param request Objeto HttpRequest representando o request recebido.
+ *   @param message String com a mensagem original do request recebido pelo proximo.
+ *   @return int entre 0 e 3, onde os numeros impares representam true e os pares representam o valor false
+ */
 int allowRedirection(HttpRequest request, std::string message){
     //Is the url in the whitelist?
     if(findString(whitelist, request.getUrl())){
@@ -49,6 +67,13 @@ int allowRedirection(HttpRequest request, std::string message){
     return true;
 }
 
+/**
+ *   @fn void redirectMessage(HttpRequest, std::string, int)
+ *   @brief Função que processa, redireciona e retorna ao cliente a resposta do request recebido
+ *   @param request Objeto HttpRequest representando o request recebido.
+ *   @param str String com a mensagem original do request recebido pelo proximo.
+ *   @param socketClient Id represenatndo o socket que liga o proxy ao cliente que solicitou o servico.
+ */
 void redirectMessage(HttpRequest request, std::string str, int socketClient)
 {
     int redirection_allowed = allowRedirection(request, str);
@@ -81,12 +106,12 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
             tv.tv_sec = 5;  /* 1 Sec Timeout - Important for reading buffers from server socket */
             setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
             
-            writeToserverSocket(str, socketServer, str.size());
+            writeToserverSocket(str, socketServer, (int)str.size());
             std::vector<Buffer> response_from_server = readFromServer(socketServer);
             
             if(response_from_server.size() > 0){
                 if(redirection_allowed > 1){ //deny_terms rule
-                    for(int i=0; i<response_from_server.size(); i++){
+                    for(int i = 0; i < response_from_server.size(); i++){
                         if(findString(deny_terms, response_from_server.at(i).step)){
                             isForbidden = true;
                             break;
@@ -117,7 +142,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
 
     if(isForbidden){
         std::string forbidden = getForbiddenResponse();
-        writeToclientSocket(forbidden, socketClient, forbidden.size());
+        writeToclientSocket(forbidden, socketClient, (int)forbidden.size());
     }
 
     std::ofstream output_file;
@@ -162,10 +187,17 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
 
 }
 
+/**
+ *   @fn static void* beginExecution(void*)
+ *   @brief Função que executa a thread processando o request e devolvendo a resposta para o cliente de origem
+ *   @param sockfdPtr struct representando o socket que liga o proxy server ao cliente do request.
+ *   @return static void* retorna ponteiro para null
+ */
 static void* beginExecution(void* sockfdPtr)
 {
-    int sockid = (intptr_t)sockfdPtr;
-    std::string str = readFromSocket(&sockid);
+    long sockid = (intptr_t)sockfdPtr;
+    int sockid_cast = (int)sockid;
+    std::string str = readFromSocket(&sockid_cast);
     
     if(str.length() == 0){
         return (void*)NULL;
@@ -173,13 +205,20 @@ static void* beginExecution(void* sockfdPtr)
     
     HttpRequest request = parserRequest(str);
     
-    redirectMessage(request, str, sockid);
+    redirectMessage(request, str, sockid_cast);
     /*final request to be sent*/
 
     std::cout << "END OF ROUTINE ..." <<std::endl << std::endl;
     return (void*)NULL;
 }
 
+/**
+ *   @fn int main(int, char *)
+ *   @brief Função que inicializa o programa
+ *   @param argc quantidade de parametros passados para o programa
+ *   @param argv parametros passados na execucao do programa
+ *   @return int 1 se erro; 0 se a execucao do programa termina sem erros
+ */
 int main(int argc , char *argv[])
 {
     //Read filter files
@@ -188,7 +227,7 @@ int main(int argc , char *argv[])
     deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
     
     struct sockaddr_in address;
-
+    
     //Creating the main socket
     int main_socket_id = socket(AF_INET, SOCK_STREAM, 0);
     
@@ -250,14 +289,14 @@ int main(int argc , char *argv[])
             
         //inform user of socket number - used in send and receive commands
         printf("New connection , socket fd is %d , ip is : %s , port : %d \n", new_socket, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
-
+        
         pthread_t thread;
-
+        
         if(pthread_create(&thread, NULL, &beginExecution, (void*)(intptr_t)new_socket) < 0) {
             std::cout << "Error creating thread.. exiting" << std::endl;
             DIE
         }
-
+        
         pthread_detach(thread);
         thread = NULL;
     }
