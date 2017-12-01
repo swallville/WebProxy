@@ -47,6 +47,7 @@ Members
 -------
 
 - Lukas Ferreira Machado (12/0127377)
+- Eduardo Said Calil Vilaça (13/0154253)
 
 Installation
 ---------------
