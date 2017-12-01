@@ -94,7 +94,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
         std::cout << request.getVersion() <<std::endl;
         std::cout << "=================================================================" <<std::endl;
 
-        host = new char[url.size()];
+        host = new char[url.size() + 1];
         std::strcpy(host, url.c_str());
 
         char *port = new char[portno.size()];

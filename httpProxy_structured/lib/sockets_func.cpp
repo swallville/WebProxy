@@ -187,19 +187,17 @@ std::string readFromSocket (int* socketId){
             
             buf[recvd] = '\0';
             if (total_recieved_bits > MAX_BUF_SIZE) {
-                int total_buffer = MAX_BUF_SIZE * 2;
+                int total_buffer = MAX_BUF_SIZE * 3;
                 request_message = (char *) realloc(request_message, total_buffer);
+                request_message[total_buffer] = '\0';
                 if (request_message == NULL) {
                     std::cout << "An error has occurred while re-allocating memory for Message" << std::endl;
                     //exit (1);
                 }
             }
-            
-            
         }
         
         strcat(request_message, buf);
-        
     }
     std::string str = request_message;
     std::cout << "END OF READING FROM SOCKET " << *socketId << std::endl;
