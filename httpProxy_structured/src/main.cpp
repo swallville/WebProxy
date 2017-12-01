@@ -6,17 +6,16 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-/**
- * @file main.cpp
- * @author Lukas Ferreira Machado
- * @brief Arquivo que contem a funcao inicial do programa e contem a logica de redirecionamento das mensagens.
- */
+//Handle multiple socket connections with select and fd_set on Linux
+
+#include <iostream>
+#include <fstream>
 #include <pthread.h>
 #include <time.h>
-#include "httpRequest.hpp"
-#include "sockets_func.hpp"
-#include "parser.hpp"
-#include "utils.hpp"
+#include "../include/httpRequest.hpp"
+#include "../include/sockets_func.hpp"
+#include "../include/parser.hpp"
+#include "../include/utils.hpp"
 
 #define TRUE 1
 #define FALSE 0
@@ -145,6 +144,43 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
         std::string forbidden = getForbiddenResponse();
         writeToclientSocket(forbidden, socketClient, (int)forbidden.size());
     }
+
+    std::ofstream output_file;
+    output_file.open("log.txt", std::ios::in | std::fstream::out | std::fstream::app);
+
+    char dt[1000];
+
+    time_t t = time(0);
+    struct tm * p = localtime(&t);
+
+    strftime(dt, 1000, "[%d/%b/%Y:%H:%M:%S %z]", p);
+
+    std::string http_status_code;
+    std::string ip_addr;
+
+    hostname_to_ip(request.getHost(), ip_addr);
+
+    if(redirection_allowed == 0){
+        http_status_code = "403";
+    }
+    else if(redirection_allowed == 1){
+        http_status_code = "200";
+    }
+    else if(redirection_allowed == 2){
+        http_status_code = "403";
+    }
+    else{
+        http_status_code = "200";
+    }
+
+    std::string version = request.getVersion();
+    remove_tags(version);
+
+    output_file << ip_addr << " - " << dt << " '" << request.getMethod()
+                << " " << request.getUrl() << " " << version << "' " << http_status_code
+                << "\n";
+
+    output_file.close();
 
     //Close the Client socket
     close(socketClient);

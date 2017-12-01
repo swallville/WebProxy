@@ -40,3 +40,7 @@ bin
 # doc/
 
 .DS_store
+
+CMakeLists.txt
+.idea
+cmake-build-debug/

@@ -6,14 +6,8 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-/**
- * @file sockets_func.cpp
- * @author Lukas Ferreira Machado
- * @brief Arquivo com a implementacao dos metodos que fazem as interacoes com os sockets
- */
-
-#include "sockets_func.hpp"
-#include "utils.hpp"
+#include "../include/sockets_func.hpp"
+#include "../include/utils.hpp"
 
 int createserverSocket(std::string address, std::string port) {
     std::cout << "CREATE SERVER SOCKET" << std::endl;

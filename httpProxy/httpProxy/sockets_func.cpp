@@ -79,7 +79,7 @@ void writeToserverSocket(std::string message, int sockfd, int size)
 void writeToclientSocket(std::string message, int sockfd, int size)
 {
     std::cout << "WRITING TO CLIENT SOCKET " << sockfd << std::endl;
-    std::cout << "Message to sendd: " << std::endl;
+    std::cout << "Message to send: " << std::endl;
     std::cout << message << std::endl;
     std::cout << size << std::endl;
    

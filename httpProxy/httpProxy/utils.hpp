@@ -65,4 +65,8 @@ std::string getForbiddenResponse();
  *   @return std::string String formatada com o formato de data do HttpResponse
  */
 std::string formatedTime(const struct tm *timeptr);
+
+int hostname_to_ip(std::string hostname , std::string& ip);
+
+void remove_tags(std::string& str);
 #endif /* utils_hpp */
