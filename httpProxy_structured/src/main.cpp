@@ -6,16 +6,20 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-//Handle multiple socket connections with select and fd_set on Linux
+/**
+* @file main.cpp
+* @author Lukas Ferreira Machado
+* @brief Arquivo que contem a funcao inicial do programa e contem a logica de redirecionamento das mensagens.
+*/
 
 #include <iostream>
 #include <fstream>
 #include <pthread.h>
 #include <time.h>
-#include "../include/httpRequest.hpp"
-#include "../include/sockets_func.hpp"
-#include "../include/parser.hpp"
-#include "../include/utils.hpp"
+#include "httpRequest.hpp"
+#include "sockets_func.hpp"
+#include "parser.hpp"
+#include "utils.hpp"
 
 #define TRUE 1
 #define FALSE 0

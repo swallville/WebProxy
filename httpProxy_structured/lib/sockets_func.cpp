@@ -6,8 +6,14 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-#include "../include/sockets_func.hpp"
-#include "../include/utils.hpp"
+/**
+ * @file sockets_func.cpp
+ * @author Lukas Ferreira Machado
+ * @brief Arquivo com a implementacao dos metodos que fazem as interacoes com os sockets
+ */
+
+#include "sockets_func.hpp"
+#include "utils.hpp"
 
 int createserverSocket(std::string address, std::string port) {
     std::cout << "CREATE SERVER SOCKET" << std::endl;
@@ -73,12 +79,12 @@ void writeToserverSocket(std::string message, int sockfd, int size)
 void writeToclientSocket(std::string message, int sockfd, int size)
 {
     std::cout << "WRITING TO CLIENT SOCKET " << sockfd << std::endl;
-    std::cout << "Message to sendd: " << std::endl;
+    std::cout << "Message to send: " << std::endl;
     std::cout << message << std::endl;
     std::cout << size << std::endl;
    
     
-    char * buff_to_server = new char[size+1];
+    char * buff_to_server = new char[size + 1];
     std::strcpy(buff_to_server, message.c_str());
     
     buff_to_server[size] = '\0';

@@ -84,7 +84,7 @@ void writeToclientSocket(std::string message, int sockfd, int size)
     std::cout << size << std::endl;
    
     
-    char * buff_to_server = new char[size+1];
+    char * buff_to_server = new char[size + 1];
     std::strcpy(buff_to_server, message.c_str());
     
     buff_to_server[size] = '\0';

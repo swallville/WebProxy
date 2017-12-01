@@ -6,14 +6,15 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+
 /**
  * @file parser.cpp
  * @author Lukas Ferreira Machado
  * @brief Arquivo com a implementacao dos metodos que fazem as interacoes com os mensagens http trocadas
  */
 
-#include "../include/parser.hpp"
-#include "../include/utils.hpp"
+#include "parser.hpp"
+#include "utils.hpp"
 
 
 HttpRequest parserRequest(std::string str){

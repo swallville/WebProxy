@@ -6,7 +6,11 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
-//Handle multiple socket connections with select and fd_set on Linux
+/**
+* @file main.cpp
+* @author Lukas Ferreira Machado
+* @brief Arquivo que contem a funcao inicial do programa e contem a logica de redirecionamento das mensagens.
+*/
 
 #include <iostream>
 #include <fstream>
@@ -21,9 +25,9 @@
 #define FALSE 0
 #define PORT 8000
 #define MAX_CONNECTIONS 100
-#define PATH_WHITELIST "whitelist.txt"
-#define PATH_BLACKLIST "blacklist.txt"
-#define PATH_DENY_TERMS "deny_terms.txt"
+#define PATH_WHITELIST "/Users/sineideferreira/Downloads/WebProxy/httpProxy/httpProxy/whitelist.txt"
+#define PATH_BLACKLIST "/Users/sineideferreira/Downloads/WebProxy/httpProxy/httpProxy/blacklist.txt"
+#define PATH_DENY_TERMS "/Users/sineideferreira/Downloads/WebProxy/httpProxy/httpProxy/deny_terms.txt"
 #define PARSER_TOKEN "\n"
 #define DIE exit(1);
 

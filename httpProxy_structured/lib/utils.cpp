@@ -6,10 +6,16 @@
 //  Copyright © 2017 Lukas Ferreira. All rights reserved.
 //
 
+/**
+* @file utils.cpp
+* @author Lukas Ferreira Machado
+* @brief Arquivo com implementacao de protótipos de funcoes gerais que podem ser utilizadas em qualquer tempo do codigo.
+*/
+
 #include <netdb.h>
 #include <arpa/inet.h>
-#include "../include/utils.hpp"
-#include "../include/response_content.hpp"
+#include "utils.hpp"
+#include "response_content.hpp"
 
 std::vector<std::string> split(std::string str, std::string token){
     std::vector<std::string>result;
@@ -120,24 +126,21 @@ int hostname_to_ip(std::string hostname , std::string &ip)
 {
     struct hostent *he;
     struct in_addr **addr_list;
-    int i;
-
+    
     if ( (he = gethostbyname( hostname.c_str() ) ) == NULL)
     {
         // get the host info
         herror("gethostbyname");
         return 1;
     }
-
+    
     addr_list = (struct in_addr **) he->h_addr_list;
-
-    for(i = 0; addr_list[i] != NULL; i++)
-    {
-        //Return the first one;
-        ip.append(inet_ntoa(*addr_list[i]));
+    
+    if (addr_list[0] != NULL) {
+        ip.append(inet_ntoa(*addr_list[0]));
         return 0;
     }
-
+    
     return 1;
 }
 
