@@ -9,7 +9,7 @@ LIB_DIR = lib
 BIN_DIR = bin
 OBJ_DIR = $(SRC_DIR)/obj
 
-GCC = @g++ -g -Wall -std=c++11 -I include
+GCC = @g++ -g -Wall -pthread -std=c++11 -I include
 RM = @rm -rf
 MKDIR = @mkdir -p
 
