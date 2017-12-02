@@ -33,7 +33,7 @@
 #include <iostream>
 #include <vector>
 
-#define MAX_BUF_SIZE 2500
+#define MAX_BUF_SIZE 1500
 
 /**
  * @value Struct que representa um trecho de buffer das mensagens trocadas entre server, client e proxy
