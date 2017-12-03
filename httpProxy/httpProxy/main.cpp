@@ -20,14 +20,15 @@
 #include "sockets_func.hpp"
 #include "parser.hpp"
 #include "utils.hpp"
+#include <map>
 
 #define TRUE 1
 #define FALSE 0
 #define PORT 8000
 #define MAX_CONNECTIONS 100
-#define PATH_WHITELIST "/Users/sineideferreira/Downloads/WebProxy/httpProxy/httpProxy/whitelist.txt"
-#define PATH_BLACKLIST "/Users/sineideferreira/Downloads/WebProxy/httpProxy/httpProxy/blacklist.txt"
-#define PATH_DENY_TERMS "/Users/sineideferreira/Downloads/WebProxy/httpProxy/httpProxy/deny_terms.txt"
+#define PATH_WHITELIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/whitelist.txt"
+#define PATH_BLACKLIST "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/blacklist.txt"
+#define PATH_DENY_TERMS "/Users/rosanarogiski/Documents/WebProxy/httpProxy/httpProxy/deny_terms.txt"
 #define PARSER_TOKEN "\n"
 #define DIE exit(1);
 
@@ -46,6 +47,10 @@ std::vector<std::string> blacklist;
  */
 std::vector<std::string> deny_terms;
 
+/**
+ * @value cache Armazena a lista de httpResponse que representa o cache da aplicacao
+ */
+std::map<std::string, std::vector<Buffer>> cache;
 
 /**
  *   @fn int allowRedirection(HttpRequest, std::string)
@@ -71,6 +76,30 @@ int allowRedirection(HttpRequest request, std::string message){
     return true;
 }
 
+int tipoResponse(std::vector<Buffer> cache_response){
+    //Find type of caching
+    int tipo = -1;
+    for(int i= 0; i<cache_response.size(); i++){
+        std::string str = cache_response.at(i).step;
+        if(str.find("Last-Modified:") != -1){
+            tipo = 1;
+            break;
+        }else if(str.find("ETag:") != -1){
+            tipo = 2;
+            break;
+        }else if(str.find("Expires:") != -1){
+            tipo = 3;
+            break;
+        }else if(str.find("max-age=") != -1){
+            tipo = 4;
+            break;
+        }
+    }
+    
+    return tipo;
+}
+
+
 /**
  *   @fn void redirectMessage(HttpRequest, std::string, int)
  *   @brief Função que processa, redireciona e retorna ao cliente a resposta do request recebido
@@ -84,6 +113,17 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
     bool isForbidden = false;
 
     if(redirection_allowed % 2 == 1 ){ //true
+        //Is the Response present in the cache?
+        
+        std::map<std::string, std::vector<Buffer>>::iterator it = cache.find(request.getUrl());
+        std::vector<Buffer> cache_response;
+        if (it != cache.end())
+            cache_response = cache.find(request.getUrl())->second;
+
+        int tipo = tipoResponse(cache_response);
+        
+        std::cout << "Tipo:  " << tipo << std::endl;
+    
         //redirect the request...
         
         char * host;
@@ -103,15 +143,101 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
         char *port = new char[portno.size()];
         std::strcpy(port, portno.c_str());
 
-        int socketServer = createserverSocket(host, port);
-        
+        int socketServer = -1;
+        if(tipo == 1 || tipo == -1 || tipo == 2){
+            socketServer = createserverSocket(host, port);
+            
+            std::cout << "Socket server " << socketServer << std::endl;
+        }
+      
+        bool on_cache = false;
         if(socketServer != -1){
             struct timeval tv;
             tv.tv_sec = 5;  /* 1 Sec Timeout - Important for reading buffers from server socket */
             setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
             
-            writeToserverSocket(str, socketServer, (int)str.size());
-            std::vector<Buffer> response_from_server = readFromServer(socketServer);
+            if(tipo != -1){
+                
+                std::vector<std::string> req_str = split(str, PARSER_TOKEN);
+                
+                std::string str_resultante = "";
+                str_resultante = req_str.at(0) + "\n";
+                str_resultante += req_str.at(1) + "\n";
+                
+                if(tipo == 1){
+                    std::string date = getLastModifiedDate(cache_response);
+                    str_resultante += "If-modified-since: "+date + "\n";
+                } else if(tipo == 2){
+                    std::string etag = getETag(cache_response);
+                    str_resultante += "If-None-Match: "+etag + "\n";
+                } else if(tipo == 3){
+                    struct tm tm;
+                    time_t t;
+                    
+                    std::string expires = getExpires(cache_response);
+                    
+                    //Thu, 31 Dec 2037 23:55:55 GMT
+                    if (strptime(expires.c_str(), "%a, %d %b %Y %H:%M:%S GMT", &tm) != NULL){
+                        t = mktime(&tm);
+                        if (t == -1){
+                            if(std::difftime(std::time(nullptr), t) > 0)
+                                on_cache = true;
+                        }
+                    }
+                } else if(tipo == 4){
+                    struct tm tm;
+                    time_t t;
+                    
+                    std::string date = getDate(cache_response);
+                    
+                    //Thu, 31 Dec 2037 23:55:55 GMT
+                    if (strptime(date.c_str(), "%a, %d %b %Y %H:%M:%S GMT", &tm) != NULL){
+                        t = mktime(&tm);
+                        if (t == -1){
+                            long time_t = (long) t;
+                            std::string maxAge = getMaxAge(cache_response);
+                            std::string::size_type sz;   // alias of size_t
+                            long li_dec = std::stol (maxAge,&sz);
+                            time_t += li_dec;
+                            
+                             std::time_t agora = std::time(nullptr);
+                            long time_now = (long) agora;
+                            
+                            
+                            if(agora < time_t)
+                                on_cache = true;
+                        }
+                    }
+                }
+                
+                if(tipo != 3 && tipo != 4){
+                    for(int i=2; i<req_str.size(); i++){
+                        str_resultante += req_str.at(i) + "\n";
+                    }
+                    str = str_resultante;
+                }
+                
+                std::cout << "To be written: " << str  << std::endl;
+                std::cout << "Entrou no if " << std::endl;
+            }
+            
+            std::vector<Buffer> response_from_server;
+            if(!on_cache){
+                writeToserverSocket(str, socketServer, (int)str.size());
+                response_from_server = readFromServer(socketServer);
+                
+                //Primeira linha do response contem codigo de retorno
+               
+                if(response_from_server.size() > 0){
+                    std::string line1 = response_from_server.at(0).step;
+                    if(line1.find("304 Not Modified") != -1){
+                        response_from_server = cache_response;
+                        std::cout << "Entrou no 304 Not Modified" << " -- -- Usou CACHE" << std::endl;
+                    }
+                }
+            }else{
+                response_from_server = cache_response;
+            }
             
             if(response_from_server.size() > 0){
                 if(redirection_allowed > 1){ //deny_terms rule
@@ -123,9 +249,15 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     }
                 }
                 
+                std::cout << "Forbidden " << isForbidden << std::endl;
                 if(!isForbidden){
                     // writing to client
                     writeToclientSocket(response_from_server, socketClient);
+                    
+                    std::cout << "Adding to cache " << std::endl;
+                    cache[request.getUrl()] = response_from_server;
+                    
+                    std::cout << "cache size: " << cache.size() << std::endl;
                 }
                 //Close the server socket
                 close(socketServer);
@@ -230,6 +362,9 @@ int main(int argc , char *argv[])
     blacklist = readFile(PATH_BLACKLIST, PARSER_TOKEN);
     deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
     
+    
+    std::mutex _mutex;
+    
     struct sockaddr_in address;
     
     //Creating the main socket
@@ -295,7 +430,7 @@ int main(int argc , char *argv[])
         printf("New connection , socket fd is %d , ip is : %s , port : %d \n", new_socket, inet_ntoa(address.sin_addr), ntohs(address.sin_port));
         
         pthread_t thread;
-        
+        std::unique_lock<std::mutex> lock(_mutex);
         if(pthread_create(&thread, NULL, &beginExecution, (void*)(intptr_t)new_socket) < 0) {
             std::cout << "Error creating thread.. exiting" << std::endl;
             DIE

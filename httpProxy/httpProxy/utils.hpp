@@ -23,6 +23,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include "sockets_func.hpp"
 
 /**
  *   @fn std::vector<std::string> split(std::string, std::string)
@@ -81,4 +82,15 @@ int hostname_to_ip(std::string hostname , std::string& ip);
  *   @param str string com o nome a ser modificado
  */
 void remove_tags(std::string& str);
+
+std::string getLastModifiedDate(std::vector<Buffer> buffer);
+
+std::string getETag(std::vector<Buffer> buffer);
+
+std::string getExpires(std::vector<Buffer> buffer);
+
+std::string getDate(std::vector<Buffer> buffer);
+
+std::string getMaxAge(std::vector<Buffer> buffer);
+
 #endif /* utils_hpp */

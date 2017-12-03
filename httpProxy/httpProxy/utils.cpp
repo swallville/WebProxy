@@ -156,3 +156,163 @@ void remove_tags(std::string& str){
             found = str.find('\r');
     }
 }
+
+std::string getLastModifiedDate(std::vector<Buffer> buffer){
+    
+    int position = -1;
+    
+    for(int i=0; i< buffer.size(); i++){
+        std::string str = buffer.at(i).step;
+        
+        if(str.find("Last-Modified:") != -1){
+            position = i;
+            break;
+        }
+    }
+    
+    if(position != -1){
+        std::string header = buffer.at(position).step;
+        
+        std::vector<std::string> linhas = split(header, "\n");
+        
+        for(int i=0; i<linhas.size(); i++){
+            if(linhas.at(i).find("Last-Modified:") != -1){
+                std::string data = linhas.at(i).substr(15, linhas.at(i).size());
+                
+                return data;
+            }
+        }
+    }
+    
+    return "";
+    
+}
+
+std::string getETag(std::vector<Buffer> buffer){
+    
+    int position = -1;
+    
+    for(int i=0; i< buffer.size(); i++){
+        std::string str = buffer.at(i).step;
+        
+        if(str.find("ETag:") != -1){
+            position = i;
+            break;
+        }
+    }
+    
+    if(position != -1){
+        std::string header = buffer.at(position).step;
+        
+        std::vector<std::string> linhas = split(header, "\n");
+        
+        for(int i=0; i<linhas.size(); i++){
+            if(linhas.at(i).find("ETag:") != -1){
+                std::string data = linhas.at(i).substr(5, linhas.at(i).size());
+                
+                return data;
+            }
+        }
+    }
+    
+    return "";
+    
+}
+
+std::string getExpires(std::vector<Buffer> buffer){
+    
+    int position = -1;
+    
+    for(int i=0; i< buffer.size(); i++){
+        std::string str = buffer.at(i).step;
+        
+        if(str.find("Expires:") != -1){
+            position = i;
+            break;
+        }
+    }
+    
+    if(position != -1){
+        std::string header = buffer.at(position).step;
+        
+        std::vector<std::string> linhas = split(header, "\n");
+        
+        for(int i=0; i<linhas.size(); i++){
+            if(linhas.at(i).find("Expires:") != -1){
+                std::string data = linhas.at(i).substr(8, linhas.at(i).size());
+                
+                return data;
+            }
+        }
+    }
+    
+    return "";
+    
+}
+
+std::string getDate(std::vector<Buffer> buffer){
+    
+    int position = -1;
+    
+    for(int i=0; i< buffer.size(); i++){
+        std::string str = buffer.at(i).step;
+        
+        if(str.find("Date:") != -1){
+            position = i;
+            break;
+        }
+    }
+    
+    if(position != -1){
+        std::string header = buffer.at(position).step;
+        
+        std::vector<std::string> linhas = split(header, "\n");
+        
+        for(int i=0; i<linhas.size(); i++){
+            if(linhas.at(i).find("Date:") != -1){
+                std::string data = linhas.at(i).substr(5, linhas.at(i).size());
+                
+                return data;
+            }
+        }
+    }
+    
+    return "";
+    
+}
+
+std::string getMaxAge(std::vector<Buffer> buffer){
+    
+    int position = -1;
+    
+    for(int i=0; i< buffer.size(); i++){
+        std::string str = buffer.at(i).step;
+        
+        if(str.find("max-age=") != -1){
+            position = i;
+            break;
+        }
+    }
+    
+    if(position != -1){
+        std::string header = buffer.at(position).step;
+        
+        std::vector<std::string> linhas = split(header, "\n");
+        
+        for(int i=0; i<linhas.size(); i++){
+            int pos = linhas.at(i).find("max-age=");
+            if(pos != -1){
+                std::string data = linhas.at(i).substr(pos + 8, linhas.at(i).size());
+                
+                int a = data.find_first_of(" ");
+                if(a!=-1){
+                    std::string retorno = data.substr(0, a);
+                    return retorno;
+                }
+            }
+        }
+    }
+    
+    return "";
+    
+}
