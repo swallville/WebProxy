@@ -14,8 +14,8 @@
 
 #include <netdb.h>
 #include <arpa/inet.h>
-#include "utils.hpp"
-#include "response_content.hpp"
+#include "../include/utils.hpp"
+#include "../include/response_content.hpp"
 
 std::vector<std::string> split(std::string str, std::string token){
     std::vector<std::string>result;
@@ -156,3 +156,43 @@ void remove_tags(std::string& str){
             found = str.find('\r');
     }
 }
+
+void to_upper_case_string(std::string &str){
+    for (int i=0; i < str.length(); ++i)
+        str[i] = std::toupper(str[i]);
+}
+
+std::string find_header(std::string response, std::string header){
+    std::string args;
+    std::size_t found = response.find(header);
+
+    if (found != std::string::npos) {
+        found = response.find(':', found);
+        if (found != std::string::npos) {
+            std::size_t args_end = response.find("\r\n", found);
+            found++;
+            int size = args_end - found;
+            return response.substr(found , size);
+        }
+    }
+    return "";
+}
+
+
+std::string get_arg_value_header(std::string arg, std::string value){
+    std::size_t arg_init = arg.find(value);
+
+    if (arg_init != std::string::npos) {
+        std::size_t arg_end = arg.find(',', arg_init);
+        if (arg_end == std::string::npos) {
+            arg_end = arg.size();
+        }
+        value = arg.substr(arg_init, arg_end - 1);
+
+        std::vector<std::string> splited_arg = split(value, "=");
+
+        return splited_arg[1];
+    }
+    return "";
+}
+

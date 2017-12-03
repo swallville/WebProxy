@@ -16,10 +16,11 @@
 #include <fstream>
 #include <pthread.h>
 #include <time.h>
-#include "httpRequest.hpp"
-#include "sockets_func.hpp"
-#include "parser.hpp"
-#include "utils.hpp"
+#include "../include/httpRequest.hpp"
+#include "../include/httpResponse.hpp"
+#include "../include/sockets_func.hpp"
+#include "../include/parser.hpp"
+#include "../include/utils.hpp"
 
 #define TRUE 1
 #define FALSE 0
@@ -46,6 +47,10 @@ std::vector<std::string> blacklist;
  */
 std::vector<std::string> deny_terms;
 
+/**
+ * @value cache_vector Armazena o cache
+ */
+std::vector<cache_type> cache_vector;
 
 /**
  *   @fn int allowRedirection(HttpRequest, std::string)
@@ -109,9 +114,17 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
             struct timeval tv;
             tv.tv_sec = 5;  /* 1 Sec Timeout - Important for reading buffers from server socket */
             setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
-            
-            writeToserverSocket(str, socketServer, (int)str.size());
-            std::vector<Buffer> response_from_server = readFromServer(socketServer);
+
+            int cache_idx = verify_cache(cache_vector, request.getHost());
+            std::vector<Buffer> response_from_server;
+
+            if(cache_idx != -1){
+                response_from_server = cache_vector[cache_idx].response;
+            }
+            else{
+                writeToserverSocket(str, socketServer, (int)str.size());
+                response_from_server = readFromServer(socketServer);
+            }
             
             if(response_from_server.size() > 0){
                 if(redirection_allowed > 1){ //deny_terms rule
@@ -126,6 +139,11 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                 if(!isForbidden){
                     // writing to client
                     writeToclientSocket(response_from_server, socketClient);
+
+                    if(cache_idx != -1){
+                        cache_vector.push_back(save_cache(response_from_server, request.getHost()));
+                    }
+
                 }
                 //Close the server socket
                 close(socketServer);

@@ -19,6 +19,7 @@
 #include <string>
 #include <cstring>
 #include "httpRequest.hpp"
+#include "sockets_func.hpp"
 
 /**
  * @fn HttpRequest parserRequest(std::string)
@@ -27,5 +28,6 @@
  * @return HttpRequest Objeto HttpRequest representando a mensagem de request recebida como parametro
  */
 HttpRequest parserRequest(std::string str);
+std::string parserResponse(std::vector<Buffer> response);
 
 #endif /* parser_hpp */

@@ -13,13 +13,14 @@
  * @brief Arquivo com a implementacao dos metodos que fazem as interacoes com os mensagens http trocadas
  */
 
-#include "parser.hpp"
-#include "utils.hpp"
+#include "../include/parser.hpp"
+#include "../include/utils.hpp"
+#include "../include/sockets_func.hpp"
 
 
 HttpRequest parserRequest(std::string str){
     HttpRequest request = *new HttpRequest();
-    
+
     std::vector<std::string> splitResult = split(str, "\n");
     
     long size = splitResult.size();

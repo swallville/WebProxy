@@ -12,7 +12,7 @@
  * @brief Arquivo com a implementacao da classe que representa um HttpRequest
  */
 
-#include "httpRequest.hpp"
+#include "../include/httpRequest.hpp"
 #include <stdio.h>
 #include <iostream>
 

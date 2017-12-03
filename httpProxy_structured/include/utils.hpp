@@ -81,4 +81,7 @@ int hostname_to_ip(std::string hostname , std::string& ip);
  *   @param str string com o nome a ser modificado
  */
 void remove_tags(std::string& str);
+void to_upper_case_string(std::string &str);
+std::string find_header(std::string response, std::string header);
+std::string get_arg_value_header(std::string cache_control, std::string arg);
 #endif /* utils_hpp */
