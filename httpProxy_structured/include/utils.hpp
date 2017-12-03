@@ -84,4 +84,5 @@ void remove_tags(std::string& str);
 void to_upper_case_string(std::string &str);
 std::string find_header(std::string response, std::string header);
 std::string get_arg_value_header(std::string cache_control, std::string arg);
+time_t string_to_time(std::string time_str);
 #endif /* utils_hpp */

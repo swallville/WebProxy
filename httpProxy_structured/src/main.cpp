@@ -140,7 +140,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     // writing to client
                     writeToclientSocket(response_from_server, socketClient);
 
-                    if(cache_idx != -1){
+                    if(cache_idx == -1){
                         cache_vector.push_back(save_cache(response_from_server, request.getHost()));
                     }
 

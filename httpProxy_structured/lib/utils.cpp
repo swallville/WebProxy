@@ -196,3 +196,63 @@ std::string get_arg_value_header(std::string arg, std::string value){
     return "";
 }
 
+int month(std::string month){
+    if(month == "JAN"){
+        return 0;
+    }
+    if(month == "FEB"){
+        return 1;
+    }
+    if(month == "MAR"){
+        return 2;
+    }
+    if(month == "APR"){
+        return 3;
+    }
+    if(month == "MAY"){
+        return 4;
+    }
+    if(month == "JUN"){
+        return 5;
+    }
+    if(month == "JUL"){
+        return 6;
+    }
+    if(month == "AUG"){
+        return 7;
+    }
+    if(month == "SEP"){
+        return 8;
+    }
+    if(month == "OCT"){
+        return 9;
+    }
+    if(month == "NOV"){
+        return 10;
+    }
+    if(month == "DEC"){
+        return 11;
+    }
+}
+
+time_t string_to_time(std::string time_str){
+    std::vector<std::string> time_array = split(time_str, " ");
+    time_t timer;
+    struct tm timeinfo = {0};
+
+    timeinfo.tm_mday = atoi(time_array[2].c_str());
+    timeinfo.tm_mon = month(time_array[3].c_str());
+
+    int ano = atoi(time_array[4].c_str());
+    ano = ano - 1900;
+    timeinfo.tm_year = ano;
+
+    std::vector<std::string> time_splited = split(time_array[5], ":");
+
+    timeinfo.tm_sec = atoi(time_splited[2].c_str());
+    timeinfo.tm_min = atoi(time_splited[1].c_str());
+    timeinfo.tm_hour = atoi(time_splited[0].c_str());
+
+    return mktime(&timeinfo);
+}
+

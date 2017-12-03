@@ -10,7 +10,7 @@
 
 struct cache_type{
     time_t storage_moment;
-    time_t freshness_time;
+    double expiration_time;
     std::string host;
     std::vector<Buffer> response;
 };

@@ -26,7 +26,7 @@ int verify_cache(std::vector<cache_type> cache_vector, std::string host){
 
         double diff = difftime(now, cache_vector[i].storage_moment);
 
-        if(diff > cache_vector[i].freshness_time){
+        if(diff > cache_vector[i].expiration_time){
             return idx;
         }
     }
@@ -48,30 +48,49 @@ cache_type save_cache(std::vector<Buffer> response_from_server, std::string host
 
     to_upper_case_string(str_response);
 
-    std::string cache_control = find_header(str_response, "CACHE-CONTROL");
+    std::string cache_control = find_header(str_response, "CACHE-CONTROL:");
 
-    std::string max_age = get_arg_value_header(cache_control, "MAX-AGE");
+    std::string max_age = get_arg_value_header(cache_control, "MAX-AGE=");
+
+    double freshnessTime;
+    double expirationTime = 0;
 
     if(max_age.empty()){
-        std::string expires = find_header(str_response, "EXPIRES");
-        std::string expires_value = split(expires, ":")[1];
-        if(!expires_value.empty()){
-            std::string date = find_header(str_response, "DATE");
-            std::string date_value = split(expires, ":")[1];
+        std::string expires = find_header(str_response, "EXPIRES:");
+        time_t expires_ttime = string_to_time(expires);
+        if(!expires.empty()){
+            std::string date = find_header(str_response, "DATE:");
+            time_t date_ttime = string_to_time(date);
+
+            freshnessTime = expires_ttime - date_ttime;
         }
         else{
-            std::string last_modified = find_header(str_response, "LAST-MODIFIED");
-            std::string last_modified_value = split(expires, ":")[1];
+            std::string last_modified = find_header(str_response, "LAST-MODIFIED:");
+            if(!last_modified.empty()) {
+                std::string date = find_header(str_response, "DATE:");
+                time_t date_ttime = string_to_time(date);
+                time_t lastM_tttime = string_to_time(last_modified);
+
+                freshnessTime = date_ttime - lastM_tttime;
+            }
+
         }
     }
+    else
+        freshnessTime = atoi(max_age.c_str());
 
-    int freshness_time = 0;
+
+    std::string expires = find_header(str_response, "AGE:");
+    int current_age = atoi(expires.c_str());
+
+    expirationTime = freshnessTime - current_age;
+
     time_t now;
     time(&now);
 
     cache_type new_cache;
     new_cache.response = response_from_server;
-    new_cache.freshness_time = freshness_time;
+    new_cache.expiration_time = expirationTime;
     new_cache.storage_moment = now;
     new_cache.host = host;
 
