@@ -56,24 +56,22 @@ cache_type save_cache(std::vector<Buffer> response_from_server, std::string host
     double expirationTime = 0;
 
     if(max_age.empty()){
-        std::string expires = find_header(str_response, "EXPIRES:");
-        time_t expires_ttime = string_to_time(expires);
-        if(!expires.empty()){
-            std::string date = find_header(str_response, "DATE:");
-            time_t date_ttime = string_to_time(date);
+        std::string date = find_header(str_response, "DATE:");
+        time_t date_ttime = string_to_time(date);
 
-            freshnessTime = expires_ttime - date_ttime;
-        }
-        else{
-            std::string last_modified = find_header(str_response, "LAST-MODIFIED:");
-            if(!last_modified.empty()) {
-                std::string date = find_header(str_response, "DATE:");
-                time_t date_ttime = string_to_time(date);
-                time_t lastM_tttime = string_to_time(last_modified);
+        if(!date.empty()) {
+            std::string expires = find_header(str_response, "EXPIRES:");
+            if (!expires.empty()) {
+                time_t expires_ttime = string_to_time(expires);
+                freshnessTime = expires_ttime - date_ttime;
+            } else {
+                std::string last_modified = find_header(str_response, "LAST-MODIFIED:");
+                if (!last_modified.empty()) {
+                    time_t lastM_tttime = string_to_time(last_modified);
+                    freshnessTime = date_ttime - lastM_tttime;
+                }
 
-                freshnessTime = date_ttime - lastM_tttime;
             }
-
         }
     }
     else
