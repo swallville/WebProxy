@@ -62,6 +62,7 @@ int createserverSocket(std::string address, std::string port) {
 void writeToserverSocket(std::string message, int sockfd, int size)
 {
     std::cout << "WRITING TO SERVER SOCKET " << sockfd << std::endl;
+    std::cout << message <<std::endl;
     int sent = 0;
     long sent_step;
 
@@ -79,8 +80,8 @@ void writeToserverSocket(std::string message, int sockfd, int size)
 void writeToclientSocket(std::string message, int sockfd, int size)
 {
     std::cout << "WRITING TO CLIENT SOCKET " << sockfd << std::endl;
-    std::cout << "Message to send: " << std::endl;
-    std::cout << message << std::endl;
+//    std::cout << "Message to send: " << std::endl;
+//    std::cout << message << std::endl;
     std::cout << size << std::endl;
    
     
@@ -148,6 +149,8 @@ std::vector<Buffer> readFromServer (int Serverfd) {
         struct Buffer item;
         memcpy(item.step, buf, iRecv);
         item.buff_len = (int)iRecv;
+        
+        std::cout << buf << std::endl;
         result.push_back(item);
         memset(buf,0,MAX_BUF_SIZE);
     }

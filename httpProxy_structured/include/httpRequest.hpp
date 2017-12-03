@@ -154,7 +154,7 @@ public:
      * @fn void print()
      * @brief Imprime os dados do http request
      */
-    void print();
+    std::string print();
 
    // ~HttpRequest();
 };

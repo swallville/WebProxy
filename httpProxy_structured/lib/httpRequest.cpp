@@ -42,7 +42,16 @@ void HttpRequest::setEntityBody(std::string entityBody){
 }
 
 void HttpRequest::addHeader(std::string header){
-    this->headers.push_back(header);
+    
+    if(headers.size() == 0)
+        this->headers.push_back(header);
+    else{
+        std::string val = this->headers.at(headers.size()-1);
+        this->headers.pop_back();
+        this->headers.push_back(header);
+        this->headers.push_back(val);
+    }
+        
 }
 
 std::string HttpRequest::getMethod(){
@@ -65,16 +74,16 @@ std::string HttpRequest::getEntityBody(){
     return this->entityBody;
 }
 
-void HttpRequest::print(){
-    std::cout << "------- Request Message: -------" << std::endl;
-    std::cout << this->method << " " << this->url << " " << this->version << std::endl;
+std::string HttpRequest::print(){
+    std::string result;
+    result =  this->method + " " + this->url + " " + this->version + "\n";
     
     long size = this->headers.size();
     for(int i=0; i< size; i++)
-        std::cout << this->headers.at(i) << std::endl;
+        result += this->headers.at(i) + "\n";
     
-    std::cout << this->entityBody << std::endl;
-    std::cout << "------- End of Request Message: -------" << std::endl;
+    result += "\n\n" + this->entityBody + "\n";
+    return result;
 }
 
 std::string HttpRequest::getHost(){

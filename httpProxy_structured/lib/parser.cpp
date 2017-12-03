@@ -34,7 +34,7 @@ HttpRequest parserRequest(std::string str){
         
     request.setVersion(line1.at(2));
     
-    for(int i=1; i<size-1; i++){
+    for(int i = 1; i < size - 1; i++){
         request.addHeader(splitResult.at(i));
     }
     request.setEntityBody(splitResult.at(size-1));
