@@ -51,9 +51,15 @@ std::vector<std::string> blacklist;
 std::vector<std::string> deny_terms;
 
 /**
- * @value cache_vector Armazena o cache
+ * @value cache_map Armazena o cache
  */
 std::map<std::string, cache_type> cache_map;
+
+/**
+ * @value ultima_verificacao_cache variavel para verificar quando foi a ultima vez em que se procurou
+ * por paginas expiradas no cache
+ */
+time_t ultima_verificacao_cache;
 
 /**
  *   @fn int allowRedirection(HttpRequest, std::string)
@@ -263,6 +269,9 @@ int main(int argc , char *argv[])
     whitelist = readFile(PATH_WHITELIST, PARSER_TOKEN);
     blacklist = readFile(PATH_BLACKLIST, PARSER_TOKEN);
     deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
+
+    time_t timer;
+    ultima_verificacao_cache = time(NULL);
     
     struct sockaddr_in address;
     
@@ -338,7 +347,16 @@ int main(int argc , char *argv[])
         pthread_detach(thread);
         thread = NULL;
 
-
+        /* Este segmento de codigo permite que a cada 30s seja removido do cache
+         * paginas expiradas*/
+        timer = time(NULL);
+        double diff = difftime(timer, ultima_verificacao_cache);
+        if(diff > 30){
+            for (auto it=cache_map.begin(); it!=cache_map.end(); ++it){
+                verify_cache((*it).second, cache_map, (*it).first);
+            }
+            ultima_verificacao_cache = time(NULL);
+        }
     }
     
     return 0;
