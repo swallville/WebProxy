@@ -16,6 +16,9 @@
 #include <fstream>
 #include <pthread.h>
 #include <time.h>
+#include <unordered_map>
+#include <bits/unordered_map.h>
+#include <map>
 #include "../include/httpRequest.hpp"
 #include "../include/httpResponse.hpp"
 #include "../include/sockets_func.hpp"
@@ -50,7 +53,7 @@ std::vector<std::string> deny_terms;
 /**
  * @value cache_vector Armazena o cache
  */
-std::vector<cache_type> cache_vector;
+std::map<std::string, cache_type> cache_map;
 
 /**
  *   @fn int allowRedirection(HttpRequest, std::string)
@@ -115,11 +118,23 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
             tv.tv_sec = 5;  /* 1 Sec Timeout - Important for reading buffers from server socket */
             setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
 
-            int cache_idx = verify_cache(cache_vector, request.getHost());
+            bool found_cache = true;
+            bool cache_valid;
+            cache_type cache;
+
+            try{
+                cache = cache_map.at(request.getUrl());
+            }
+            catch(const std::out_of_range&) {
+                found_cache = false;
+            }
+
+            cache_valid = found_cache && verify_cache(cache, cache_map, request.getUrl());
+
             std::vector<Buffer> response_from_server;
 
-            if(cache_idx != -1){
-                response_from_server = cache_vector[cache_idx].response;
+            if(cache_valid){
+                response_from_server = cache.response;
             }
             else{
                 writeToserverSocket(str, socketServer, (int)str.size());
@@ -140,8 +155,8 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     // writing to client
                     writeToclientSocket(response_from_server, socketClient);
 
-                    if(cache_idx == -1){
-                        cache_vector.push_back(save_cache(response_from_server, request.getHost()));
+                    if(!cache_valid){
+                        cache_map[request.getUrl()] = save_cache(response_from_server, request.getUrl());
                     }
 
                 }
@@ -321,6 +336,8 @@ int main(int argc , char *argv[])
         
         pthread_detach(thread);
         thread = NULL;
+
+        
     }
     
     return 0;

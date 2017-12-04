@@ -2,36 +2,26 @@
 // Created by duducalil on 03/12/17.
 //
 #include <vector>
+#include <unordered_map>
+#include <map>
 #include "../include/httpResponse.hpp"
 #include "../include/utils.hpp"
 
 struct cache_type;
 
 
-int verify_cache(std::vector<cache_type> cache_vector, std::string host){
-    unsigned long int size = cache_vector.size();
-    bool found = false;
-    int i, idx = -1;
+bool verify_cache(cache_type cache, std::map<std::string, cache_type> &cache_map, std::string url){
+    time_t now;
+    time(&now);
 
-    for(i = 0; i < size; i++){
-        if(cache_vector[i].host == host){
-            found = true;
-            idx = i;
-        }
+    double diff = difftime(now, cache.storage_moment);
+
+    bool valid = cache.expiration_time > diff;
+
+    if(!valid){
+        cache_map.erase(url);
     }
-
-    if(found){
-        time_t now;
-        time(&now);
-
-        double diff = difftime(now, cache_vector[i].storage_moment);
-
-        if(diff > cache_vector[i].expiration_time){
-            return idx;
-        }
-    }
-
-    return -1;
+    return valid;
 }
 
 cache_type save_cache(std::vector<Buffer> response_from_server, std::string host){
@@ -90,7 +80,6 @@ cache_type save_cache(std::vector<Buffer> response_from_server, std::string host
     new_cache.response = response_from_server;
     new_cache.expiration_time = expirationTime;
     new_cache.storage_moment = now;
-    new_cache.host = host;
 
     return new_cache;
 }
