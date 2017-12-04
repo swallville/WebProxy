@@ -16,7 +16,7 @@
 #include "utils.hpp"
 
 int createserverSocket(std::string address, std::string port) {
-    std::cout << "CREATE SERVER SOCKET" << std::endl;
+//    std::cout << "CREATE SERVER SOCKET" << std::endl;
     struct addrinfo server;
     struct addrinfo *socket_rep;
     
@@ -29,8 +29,8 @@ int createserverSocket(std::string address, std::string port) {
     server.ai_socktype = SOCK_STREAM;
     
     if (getaddrinfo(&address[0], &port[0], &server, &socket_rep) != 0) {
-        std::cout << address << std::endl;
-        std::cout << port << std::endl;
+//        std::cout << address << std::endl;
+//        std::cout << port << std::endl;
         std::cout << "The address is not right. Error in server address format!" << std::endl;
         return -1;
     }
@@ -55,14 +55,14 @@ int createserverSocket(std::string address, std::string port) {
     /* Free paRes, which was dynamically allocated by getaddrinfo */
     freeaddrinfo(socket_rep);
     
-     std::cout << "END OF CREATE SERVER SOCKET" << std::endl;
+//    std::cout << "END OF CREATE SERVER SOCKET" << std::endl;
     return socket_server;
 }
 
 void writeToserverSocket(std::string message, int sockfd, int size)
 {
-    std::cout << "WRITING TO SERVER SOCKET " << sockfd << std::endl;
-    std::cout << message <<std::endl;
+//    std::cout << "WRITING TO SERVER SOCKET " << sockfd << std::endl;
+//    std::cout << message <<std::endl;
     int sent = 0;
     long sent_step;
 
@@ -74,15 +74,15 @@ void writeToserverSocket(std::string message, int sockfd, int size)
         sent += sent_step;
     }
     
-    std::cout << "END OF WRITING TO SERVER SOCKET " << sockfd << std::endl;
+//    std::cout << "END OF WRITING TO SERVER SOCKET " << sockfd << std::endl;
 }
 
 void writeToclientSocket(std::string message, int sockfd, int size)
 {
-    std::cout << "WRITING TO CLIENT SOCKET " << sockfd << std::endl;
+//    std::cout << "WRITING TO CLIENT SOCKET " << sockfd << std::endl;
 //    std::cout << "Message to send: " << std::endl;
 //    std::cout << message << std::endl;
-    std::cout << size << std::endl;
+//    std::cout << size << std::endl;
    
     
     char * buff_to_server = new char[size + 1];
@@ -94,14 +94,14 @@ void writeToclientSocket(std::string message, int sockfd, int size)
     
     while (totalsent < size) {
         if ((senteach = send(sockfd, (void *) (buff_to_server + totalsent), (long)(size - totalsent), 0)) < 0) {
-            fprintf (stderr," Error in sending to server ! \n");
+            std::cout << " Error in sending to server ! " << std::endl;
             exit (1);
         }
         totalsent += senteach;
         
     }
     
-    std::cout << " END OF WRITING TO CLIENT SOCKET " << sockfd << std::endl;
+//    std::cout << " END OF WRITING TO CLIENT SOCKET " << sockfd << std::endl;
     close(sockfd);
     
 }
@@ -109,8 +109,8 @@ void writeToclientSocket(std::string message, int sockfd, int size)
 
 void writeToclientSocket(std::vector<Buffer> result, int sockfd)
 {
-    std::cout << "WRITING TO CLIENT SOCKET - REDIRECT BUFFERS" << sockfd << std::endl;
-    std::cout << "INto write" << std::endl;
+//    std::cout << "WRITING TO CLIENT SOCKET - REDIRECT BUFFERS" << sockfd << std::endl;
+//    std::cout << "INto write" << std::endl;
     for(int i=0; i<result.size(); i++){
         int totalsent = 0;
         long senteach;
@@ -118,10 +118,10 @@ void writeToclientSocket(std::vector<Buffer> result, int sockfd)
         
         while (totalsent < buff_length) {
             if ((senteach = send(sockfd, (void *) (result.at(i).step + totalsent), buff_length - totalsent, 0)) < 0) {
-                fprintf (stderr," Error in sending to server ! \n");
-                exit (1);
+//                std::cout << " Error in sending to server !" << std:: endl;
+//                exit (1);
             }
-            std::cout << "Sent each: " << senteach << std::endl;
+//            std::cout << "Sent each: " << senteach << std::endl;
             totalsent += senteach;
         }
         
@@ -129,12 +129,12 @@ void writeToclientSocket(std::vector<Buffer> result, int sockfd)
             std::cout << "NEM TODOS OS BYTES FORAM ENVIADOS" << std::endl;
         }
     }
-    std::cout << "END OF WRITING TO CLIENT SOCKET - REDIRECT BUFFERS" << sockfd << std::endl;
+//    std::cout << "END OF WRITING TO CLIENT SOCKET - REDIRECT BUFFERS" << sockfd << std::endl;
 }
 
 
 std::vector<Buffer> readFromServer (int Serverfd) {
-    std::cout << " ======== READING FROM SERVER ===========" << Serverfd << std::endl;
+//    std::cout << " ======== READING FROM SERVER ===========" << Serverfd << std::endl;
     
     long iRecv;
     char buf[MAX_BUF_SIZE];
@@ -150,19 +150,19 @@ std::vector<Buffer> readFromServer (int Serverfd) {
         memcpy(item.step, buf, iRecv);
         item.buff_len = (int)iRecv;
         
-        std::cout << buf << std::endl;
+//        std::cout << buf << std::endl;
         result.push_back(item);
         memset(buf,0,MAX_BUF_SIZE);
     }
     
-    std::cout << "======= END OF READING FROM SERVER -======= " << Serverfd << std::endl;
-    std::cout << result.size() << std::endl;
+//    std::cout << "======= END OF READING FROM SERVER -======= " << Serverfd << std::endl;
+//    std::cout << result.size() << std::endl;
     return result;
 }
 
 std::string readFromSocket (int* socketId){
     
-    std::cout << "READING FROM SOCKET " << *socketId << std::endl;
+//    std::cout << "READING FROM SOCKET " << *socketId << std::endl;
     char buf[MAX_BUF_SIZE];
     char *request_message;
     request_message = (char *) malloc(MAX_BUF_SIZE);
@@ -203,7 +203,7 @@ std::string readFromSocket (int* socketId){
         strcat(request_message, buf);
     }
     std::string str = request_message;
-    std::cout << "END OF READING FROM SOCKET " << *socketId << std::endl;
+//    std::cout << "END OF READING FROM SOCKET " << *socketId << std::endl;
     return str;
 }
 

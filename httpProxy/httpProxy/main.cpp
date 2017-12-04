@@ -135,7 +135,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
 
         int tipo = tipoResponse(cache_response);
         
-        std::cout << "Tipo:  " << tipo << std::endl;
+//        std::cout << "Tipo:  " << tipo << std::endl;
     
         //redirect the request...
         
@@ -143,12 +143,12 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
         std::string url = request.getHost();
         std::string portno = request.getPort();
         
-        std::cout << "=================================================================" <<std::endl;
-        std::cout << "Host to be called: " << url << " - Port : " << portno <<std::endl;
-        std::cout << request.getMethod() <<std::endl;
-        std::cout << request.getUrl() <<std::endl;
-        std::cout << request.getVersion() <<std::endl;
-        std::cout << "=================================================================" <<std::endl;
+//        std::cout << "=================================================================" <<std::endl;
+//        std::cout << "Host to be called: " << url << " - Port : " << portno <<std::endl;
+//        std::cout << request.getMethod() <<std::endl;
+//        std::cout << request.getUrl() <<std::endl;
+//        std::cout << request.getVersion() <<std::endl;
+//        std::cout << "=================================================================" <<std::endl;
 
         host = new char[url.size() + 1];
         std::strcpy(host, url.c_str());
@@ -159,8 +159,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
         int socketServer = -1;
         if(tipo == 1 || tipo == -1 || tipo == 2){
             socketServer = createserverSocket(host, port);
-            
-            std::cout << "Socket server " << socketServer << std::endl;
+//            std::cout << "Socket server " << socketServer << std::endl;
         }
       
         bool on_cache = false;
@@ -230,8 +229,8 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     str = str_resultante;
                 }
                 
-                std::cout << "To be written: " << str  << std::endl;
-                std::cout << "Entrou no if " << std::endl;
+//                std::cout << "To be written: " << str  << std::endl;
+//                std::cout << "Entrou no if " << std::endl;
             }
             
             std::vector<Buffer> response_from_server;
@@ -245,7 +244,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     std::string line1 = response_from_server.at(0).step;
                     if(line1.find("304 Not Modified") != -1){
                         response_from_server = cache_response;
-                        std::cout << "Entrou no 304 Not Modified" << " -- -- Usou CACHE" << std::endl;
+//                        std::cout << "Entrou no 304 Not Modified" << " -- -- Usou CACHE" << std::endl;
                     }
                 }
             }else{
@@ -262,15 +261,15 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     }
                 }
                 
-                std::cout << "Forbidden " << isForbidden << std::endl;
+//                std::cout << "Forbidden " << isForbidden << std::endl;
                 if(!isForbidden){
                     // writing to client
                     writeToclientSocket(response_from_server, socketClient);
                     
-                    std::cout << "Adding to cache " << std::endl;
+//                    std::cout << "Adding to cache " << std::endl;
                     cache[request.getUrl()] = response_from_server;
                     
-                    std::cout << "cache size: " << cache.size() << std::endl;
+//                    std::cout << "cache size: " << cache.size() << std::endl;
                 }
                 //Close the server socket
                 close(socketServer);
@@ -417,7 +416,7 @@ static void* beginExecution(void* sockfdPtr)
     redirectMessage(request, str, sockid_cast);
     /*final request to be sent*/
 
-    std::cout << "END OF ROUTINE ..." <<std::endl << std::endl;
+//    std::cout << "END OF ROUTINE ..." <<std::endl << std::endl;
     return (void*)NULL;
 }
 
@@ -507,7 +506,7 @@ int main(int argc , char *argv[])
             
         if (new_socket < 0)
         {
-            perror("accept");
+            perror("Error on accepting connections");
             exit(EXIT_FAILURE);
         }
             
