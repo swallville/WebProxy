@@ -16,8 +16,6 @@
 #include <fstream>
 #include <pthread.h>
 #include <time.h>
-#include <unordered_map>
-#include <bits/unordered_map.h>
 #include <map>
 #include "../include/httpRequest.hpp"
 #include "../include/httpResponse.hpp"

@@ -2,7 +2,6 @@
 // Created by duducalil on 03/12/17.
 //
 #include <vector>
-#include <unordered_map>
 #include <map>
 #include "../include/httpResponse.hpp"
 #include "../include/utils.hpp"
