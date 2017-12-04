@@ -21,6 +21,8 @@
 #include "parser.hpp"
 #include "utils.hpp"
 #include <map>
+#include <algorithm>
+#include <string>
 
 #define TRUE 1
 #define FALSE 0
@@ -51,6 +53,8 @@ std::vector<std::string> deny_terms;
  * @value cache Armazena a lista de httpResponse que representa o cache da aplicacao
  */
 std::map<std::string, std::vector<Buffer>> cache;
+
+bool editarRequests;
 
 /**
  *   @fn int allowRedirection(HttpRequest, std::string)
@@ -169,7 +173,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                     str_resultante += "If-modified-since: "+date + "\n";
                 } else if(tipo == 2){
                     std::string etag = getETag(cache_response);
-                    str_resultante += "If-None-Match: "+etag + "\n";
+                    str_resultante += "If-None-Match: \""+etag + "\"\n";
                 } else if(tipo == 3){
                     struct tm tm;
                     time_t t;
@@ -341,6 +345,59 @@ static void* beginExecution(void* sockfdPtr)
     
     HttpRequest request = parserRequest(str);
     
+    if(editarRequests){
+        std::cout << "=======================================================================================" << std::endl;
+        std::cout << "Insira o novo valor alterado da linha ou apenas enter para manter a linha em questao. Para adicionar novas linhas adicione ao final. Para remover a linha digite 'EXCLUIR'" << std::endl;
+        
+        std::vector<std::string> request_lines = split(str, PARSER_TOKEN);
+        std::string result ="";
+        
+        std::string linha_anterior = "";
+        
+        for(int i=0; i<request_lines.size(); i++){
+            std::string line;
+            std::cout << request_lines.at(i) << std::endl;
+            if(i==0)
+                std::cin.ignore();
+            
+            std::getline (std::cin, line);
+            
+            std::locale loc;
+            std::string excluir = "EXCLUIR";
+            
+            std::transform(line.begin(), line.end(),line.begin(), ::toupper);
+            
+            if(line.empty()){
+                result += request_lines.at(i) + "\n";
+                if( i != 0 && linha_anterior.length() == 0){//adicao de linhas
+                    
+                }else{
+                    linha_anterior = request_lines.at(i);
+                }
+                
+            }else if (excluir.compare(line) != 0){
+                result += line + "\n";
+            }else{
+                //excluir a linha
+                //faz nada
+            }
+        }
+        
+        if(linha_anterior.length() == 0){
+            result += "\n\n";
+        }
+        
+        str = result;
+        
+        std::cout << "=======================================================================================" << std::endl;
+        std::cout << "Novo Request: " << std::endl;
+        
+        std::cout << "---------------------------------------------------------------------------------------" << std::endl;
+        std::cout << str << std::endl;
+        std::cout << "---------------------------------------------------------------------------------------" << std::endl;
+        
+        
+    }
     redirectMessage(request, str, sockid_cast);
     /*final request to be sent*/
 
@@ -362,6 +419,16 @@ int main(int argc , char *argv[])
     blacklist = readFile(PATH_BLACKLIST, PARSER_TOKEN);
     deny_terms = readFile(PATH_DENY_TERMS, PARSER_TOKEN);
     
+    std::cout << "==========================================================" << std::endl;
+    std::cout << "Deseja editar os request's? (S/N)" << std::endl;
+    std::string editar;
+    std::cin >> editar;
+    std::cout << "==========================================================" << std::endl;
+    
+    if(editar[0] == 'S' || editar[0] == 's')
+        editarRequests = true;
+    else
+        editarRequests = false;
     
     std::mutex _mutex;
     
@@ -397,7 +464,7 @@ int main(int argc , char *argv[])
         exit(EXIT_FAILURE);
     }
     
-    signal(SIGPIPE, SIG_IGN);
+    //signal(SIGPIPE, SIG_IGN);
     std::cout << "SERVER IS LISTENING ON PORT " << PORT << std::endl;
     
     //Set maximim requests on the server queue
@@ -409,6 +476,8 @@ int main(int argc , char *argv[])
     
     
     std::cout << "SERVER IS WAITING FOR CONNECTIONS..." << std::endl;
+    
+   
     
     while (TRUE)
     {
