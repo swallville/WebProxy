@@ -122,6 +122,60 @@ std::string getForbiddenResponse(){
     return response;
 }
 
+std::string getNotFoundResponse(){
+    std::string response = "";
+    response.append("HTTP/1.1 404 Not Found\n");
+    response.append("Connection: close\n");
+    response.append("Date: ");
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+    
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    
+    response.append(formatedTime(timeinfo));
+    response.append("\n");
+    response.append("Content-Length: ");
+    response.append("\n");
+    
+    std::string content = getNotFound();
+    response.append(std::to_string(content.size()));
+    response.append("\n");
+    response.append("Content-Type: text/html\n");
+    response.append("\n\r\n\r");
+    response.append(content);
+    
+    return response;
+}
+
+std::string getTimeoutResponse(){
+    std::string response = "";
+    response.append("HTTP/1.1 408 Request Timeout\n");
+    response.append("Connection: close\n");
+    response.append("Date: ");
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+    
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    
+    response.append(formatedTime(timeinfo));
+    response.append("\n");
+    response.append("Content-Length: ");
+    response.append("\n");
+    
+    std::string content = getTimeout();
+    response.append(std::to_string(content.size()));
+    response.append("\n");
+    response.append("Content-Type: text/html\n");
+    response.append("\n\r\n\r");
+    response.append(content);
+    
+    return response;
+}
+
 int hostname_to_ip(std::string hostname , std::string &ip)
 {
     struct hostent *he;

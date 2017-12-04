@@ -266,11 +266,18 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                 //Close the server socket
                 close(socketServer);
             }else{
+                std::string timeout = getTimeoutResponse();
+                writeToclientSocket(timeout, socketClient, (int)timeout.size());
+                
                 close(socketServer);
                 isForbidden = false;
             }
             
         }else{
+            //erro ao criar socket - host nao existe
+            std::string notFound = getNotFoundResponse();
+            writeToclientSocket(notFound, socketClient, (int)notFound.size());
+            
             close(socketServer);
             return;
         }

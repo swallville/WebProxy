@@ -93,4 +93,8 @@ std::string getDate(std::vector<Buffer> buffer);
 
 std::string getMaxAge(std::vector<Buffer> buffer);
 
+std::string getNotFoundResponse();
+
+std::string getTimeoutResponse();
+
 #endif /* utils_hpp */

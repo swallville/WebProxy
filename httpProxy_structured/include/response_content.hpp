@@ -26,4 +26,8 @@
  */
 std::string getForbidden();
 
+std::string getNotFound();
+
+std::string getTimeout();
+
 #endif /* response_content_hpp */
