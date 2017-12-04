@@ -240,6 +240,10 @@ time_t string_to_time(std::string time_str){
     time_t timer;
     struct tm timeinfo = {0};
 
+    if(time_array.size() < 6){
+        return -1;
+    }
+
     timeinfo.tm_mday = atoi(time_array[2].c_str());
     timeinfo.tm_mon = month(time_array[3].c_str());
 

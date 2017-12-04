@@ -47,9 +47,8 @@ cache_type save_cache(std::vector<Buffer> response_from_server, std::string host
 
     if(max_age.empty()){
         std::string date = find_header(str_response, "DATE:");
-        time_t date_ttime = string_to_time(date);
-
         if(!date.empty()) {
+            time_t date_ttime = string_to_time(date);
             std::string expires = find_header(str_response, "EXPIRES:");
             if (!expires.empty()) {
                 time_t expires_ttime = string_to_time(expires);
@@ -72,6 +71,9 @@ cache_type save_cache(std::vector<Buffer> response_from_server, std::string host
     int current_age = atoi(expires.c_str());
 
     expirationTime = freshnessTime - current_age;
+
+    if(expirationTime < 0)
+        expirationTime = 0;
 
     time_t now;
     time(&now);

@@ -119,7 +119,7 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
             setsockopt(socketServer, SOL_SOCKET, SO_RCVTIMEO,(struct timeval *)&tv,sizeof(struct timeval));
 
             bool found_cache = true;
-            bool cache_valid;
+            bool cache_valid = false;
             cache_type cache;
 
             try{
@@ -129,7 +129,8 @@ void redirectMessage(HttpRequest request, std::string str, int socketClient)
                 found_cache = false;
             }
 
-            cache_valid = found_cache && verify_cache(cache, cache_map, request.getUrl());
+            if(found_cache)
+                cache_valid = found_cache && verify_cache(cache, cache_map, request.getUrl());
 
             std::vector<Buffer> response_from_server;
 
@@ -337,7 +338,7 @@ int main(int argc , char *argv[])
         pthread_detach(thread);
         thread = NULL;
 
-        
+
     }
     
     return 0;
