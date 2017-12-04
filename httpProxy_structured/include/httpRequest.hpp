@@ -151,8 +151,9 @@ public:
     std::string getPort();
 
     /**
-     * @fn void print()
-     * @brief Imprime os dados do http request
+     * @fn std::string print()
+     * @brief Retorna os dados do http request
+    * @return std::string Retorna uma string representando o request
      */
     std::string print();
 

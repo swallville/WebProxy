@@ -83,18 +83,58 @@ int hostname_to_ip(std::string hostname , std::string& ip);
  */
 void remove_tags(std::string& str);
 
+/**
+ *   @fn std::string getLastModifiedDate(std::vector<Buffer> buffer)
+ *   @brief Função que retorna a data de Last-Modified para uma string http response
+ *   @param buffer Lista de Buffer contendo buffers de resposta.
+ *   @return std::string Valor do header Last-Modified se existir , "" caso contrario
+ */
 std::string getLastModifiedDate(std::vector<Buffer> buffer);
 
+/**
+ *   @fn std::string getETag(std::vector<Buffer> buffer)
+ *   @brief Função que retorna a data de ETag para uma string http response
+ *   @param buffer Lista de Buffer contendo buffers de resposta.
+ *   @return std::string Valor do header ETag se existir , "" caso contrario
+ */
 std::string getETag(std::vector<Buffer> buffer);
 
+/**
+ *   @fn std::string getExpires(std::vector<Buffer> buffer)
+ *   @brief Função que retorna a data de expiracao para uma string http response
+ *   @param buffer Lista de Buffer contendo buffers de resposta.
+ *   @return std::string Valor do header Expires se existir , "" caso contrario
+ */
 std::string getExpires(std::vector<Buffer> buffer);
 
+/**
+ *   @fn std::string getDate(std::vector<Buffer> buffer)
+ *   @brief Função que retorna a data para uma string http response
+ *   @param buffer Lista de Buffer contendo buffers de resposta.
+ *   @return std::string Valor do header Date se existir , "" caso contrario
+ */
 std::string getDate(std::vector<Buffer> buffer);
 
+/**
+ *   @fn std::string getMaxAge(std::vector<Buffer> buffer)
+ *   @brief Função que retorna o max-age para uma string http response
+ *   @param buffer Lista de Buffer contendo buffers de resposta.
+ *   @return std::string Valor do header max-age se existir , "" caso contrario
+ */
 std::string getMaxAge(std::vector<Buffer> buffer);
 
+/**
+ *   @fn std::string getNotFoundResponse()
+ *   @brief Função que gera um HTTPResponse com codigo de erro 404
+ *   @return std::string String representando o HttpResponse de um erro 404 - Not Found url
+ */
 std::string getNotFoundResponse();
 
+/**
+ *   @fn std::string getTimeoutResponse()
+ *   @brief Função que gera um HTTPResponse com codigo de erro 408
+ *   @return std::string String representando o HttpResponse de um erro 408 - Request Timeout
+ */
 std::string getTimeoutResponse();
 
 #endif /* utils_hpp */

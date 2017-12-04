@@ -26,8 +26,18 @@
  */
 std::string getForbidden();
 
+/**
+ * @fn std::string getNotFound()
+ * @brief Função que cria uma mensagem http response para erros do tipo 404 - Not Found
+ * @return std::string String representando a mensagem http response para erros 404 - Not Found url
+ */
 std::string getNotFound();
 
+/**
+ * @fn std::string getTimeout()
+ * @brief Função que cria uma mensagem http response para erros do tipo 408 - Request Timeout
+ * @return std::string String representando a mensagem http response para erros 408 - Request Timeout
+ */
 std::string getTimeout();
 
 #endif /* response_content_hpp */

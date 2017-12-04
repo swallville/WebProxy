@@ -54,6 +54,9 @@ std::vector<std::string> deny_terms;
  */
 std::map<std::string, std::vector<Buffer>> cache;
 
+/**
+ * @value editarRequests Armazena a escolha entre editar ou nao os requests
+ */
 bool editarRequests;
 
 /**
@@ -80,6 +83,12 @@ int allowRedirection(HttpRequest request, std::string message){
     return true;
 }
 
+/**
+ *   @fn int tipoResponse(std::vector<std::string>)
+ *   @brief Função que verifica com que tipo de caching a pagina web trabalha: Last_Modified, ETag, Expires, max-age
+ *   @param cache_response Vetor de Objeto Buffer representando a resposta do servidor.
+ *   @return int onde: -1: significa que nenhuma tag de caching foi encontrada; 1: significa cachngo por Last_modified; 2: significa caching por ETag; 3: caching pela tag Expires; 4: caching pela tag max-age
+ */
 int tipoResponse(std::vector<Buffer> cache_response){
     //Find type of caching
     int tipo = -1;
